@@ -1,0 +1,38 @@
+{
+  "name": "sr_ibmi_common",
+  "version": "1.0.0",
+  "description": "ibmi common code used from vscode extension",
+  "main": "ibmi-common.js",
+  "types": "lib/ibmi-common.d.ts",
+  "scripts": {
+    "test": "jest --config jestconfig.json",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "files": [
+    "/lib"
+  ],
+    "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lae0901/sr_ibmi_common.git"
+  },
+  "keywords": [],
+  "author": "Stephen Richter",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/lae0901/sr_ibmi_common/issues"
+  },
+  "homepage": "https://github.com/lae0901/sr_ibmi_common#readme",
+  "devDependencies": {
+    "@types/node": "^13.7.0",
+    "prettier": "^1.19.1",
+    "tslint": "^6.0.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "sr_core_ts": "^1.23.2"
+  }
+}
