@@ -13,7 +13,7 @@
   "files": [
     "/lib"
   ],
-    "repository": {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/lae0901/sr_ibmi_common.git"
   },
