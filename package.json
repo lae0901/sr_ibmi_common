@@ -1,8 +1,8 @@
 {
   "name": "sr_ibmi_common",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ibmi common code used from vscode extension",
-  "main": "ibmi-common.js",
+  "main": "lib/ibmi-common.js",
   "types": "lib/ibmi-common.d.ts",
   "scripts": {
     "test": "jest --config jestconfig.json",
