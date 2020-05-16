@@ -22,15 +22,4 @@ export declare function as400_tablesAndViews_select(schema: string, collName: st
     COLLNAME: string;
     COLLTYPE: string;
 }]>;
-export interface steve_mbrlist {
-    FILENAME: string;
-    LIBNAME: string;
-    MBRNAME: string;
-    NUMRCDS: number;
-    CRTDATE: string;
-    CHGDATE: string;
-    CHGTIME: string;
-    MBRTEXT: string;
-    SRCTYPE: string;
-}
 export {};
