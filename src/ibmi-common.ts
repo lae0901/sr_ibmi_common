@@ -171,3 +171,16 @@ export async function as400_tablesAndViews_select(schema: string, collName: stri
 
   return rows;
 }
+
+export interface steve_mbrlist
+{
+  FILENAME: string,
+  LIBNAME: string,
+  MBRNAME: string,
+  NUMRCDS: number,
+  CRTDATE: string,
+  CHGDATE: string,
+  CHGTIME: string,
+  MBRTEXT: string,
+  SRCTYPE: string
+};
