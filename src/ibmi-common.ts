@@ -1,7 +1,20 @@
 // media/ibmi_common.ts
 
-import { object_toQueryString, string_rtrim } from 'sr_core_ts';
+import { object_toQueryString, string_rtrim, string_matchGeneric } from 'sr_core_ts';
 import axios from 'axios';
+
+export interface iDspfd_mbrlist
+{
+  FILENAME: string,
+  LIBNAME: string,
+  MBRNAME: string,
+  NUMRCDS: number,
+  CRTDATE: string,
+  CHGDATE: string,
+  CHGTIME: string,
+  MBRTEXT: string,
+  SRCTYPE: string
+};
 
 // --------------------- as400_srcfList -----------------------
 export function as400_srcfList(objName: string, libName: string) : Promise<{}[]>
@@ -87,7 +100,8 @@ export async function as400_srcmbrLines(libName: string, fileName: string, mbrNa
 
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.
-export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string = ''): Promise<[{}]>
+export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string = '')
+  : Promise<iDspfd_mbrlist[]>
 {
   const libl = 'couri7 aplusb1fcc qtemp';
   const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
@@ -112,9 +126,20 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
   // filter on member name.
   if (mbrName)
   {
+
+    // mbrName as generic name.
+
     rows = rows.filter((item: any) =>
     {
-      return (string_rtrim(item.MBRNAME).indexOf(mbrName) >= 0);
+      const item_mbrName = item.MBRNAME.trimRight();
+      if (mbrName.endsWith('*'))
+      {
+        return string_matchGeneric(item_mbrName, mbrName);
+      }
+      else
+      {
+        return (string_rtrim(item.MBRNAME).indexOf(mbrName) >= 0);
+      }
     });
   }
 
