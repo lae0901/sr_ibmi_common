@@ -1,4 +1,4 @@
-export interface iDspfd_mbrlist {
+interface iDspfd_mbrlist {
     FILENAME: string;
     LIBNAME: string;
     MBRNAME: string;
@@ -22,3 +22,4 @@ export declare function as400_tablesAndViews_select(schema: string, collName: st
     COLLNAME: string;
     COLLTYPE: string;
 }]>;
+export {};

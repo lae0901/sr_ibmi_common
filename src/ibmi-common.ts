@@ -3,7 +3,7 @@
 import { object_toQueryString, string_rtrim, string_matchGeneric } from 'sr_core_ts';
 import axios from 'axios';
 
-export interface iDspfd_mbrlist
+interface iDspfd_mbrlist
 {
   FILENAME: string,
   LIBNAME: string,
