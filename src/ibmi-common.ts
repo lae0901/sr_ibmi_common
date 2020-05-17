@@ -72,8 +72,11 @@ export function as400_routines(libName: string, routineName: string): Promise<{}
 
 // --------------------- as400_srcmbrLines -----------------------
 export async function as400_srcmbrLines(libName: string, fileName: string, mbrName: string)
-  : Promise<[{ SEQNBR: string, CHGDATE: string, TEXT: string }]>
+  : Promise<{ SEQNBR: string, CHGDATE: string, TEXT: string }[]>
 {
+  const promise = new Promise < { SEQNBR: string, CHGDATE: string, TEXT: string }[] >(async (resolve, reject) =>
+  {
+
   const libl = 'couri7 aplusb1fcc qtemp';
   const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
   const sql = 'select    a.seqnbr, char(a.chgdate,iso) chgdate, a.text ' +
@@ -95,7 +98,9 @@ export async function as400_srcmbrLines(libName: string, fileName: string, mbrNa
 
   const rows = await response.data;
 
-  return rows;
+  resolve(rows);
+}) ;
+return promise ;
 }
 
 // --------------------- as400_srcmbrList -----------------------
@@ -103,47 +108,49 @@ export async function as400_srcmbrLines(libName: string, fileName: string, mbrNa
 export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string = '')
   : Promise<iDspfd_mbrlist[]>
 {
-  const libl = 'couri7 aplusb1fcc qtemp';
-  const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
-  const sql = 'select    a.* ' +
-    'from      table(system_dspfd_mbrlist(?,?)) a ' +
-    'order by  a.mbrname ';
-  const params =
+  const promise = new Promise< iDspfd_mbrlist[]>(async (resolve, reject) =>
   {
-    libl, sql,
-    parm1: fileName, parm2: libName, debug: 'N'
-  };
-
-  const query = object_toQueryString(params);
-  const url_query = url + '?' + query;
-
-  const response = await axios({
-    method: 'get', url: url_query, responseType: 'json'
-  });
-
-  let rows = await response.data;
-
-  // filter on member name.
-  if (mbrName)
-  {
-
-    // mbrName as generic name.
-
-    rows = rows.filter((item: any) =>
+    const libl = 'couri7 aplusb1fcc qtemp';
+    const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
+    const sql = 'select    a.* ' +
+      'from      table(system_dspfd_mbrlist(?,?)) a ' +
+      'order by  a.mbrname ';
+    const params =
     {
-      const item_mbrName = item.MBRNAME.trimRight();
-      if (mbrName.endsWith('*'))
-      {
-        return string_matchGeneric(item_mbrName, mbrName);
-      }
-      else
-      {
-        return (string_rtrim(item.MBRNAME).indexOf(mbrName) >= 0);
-      }
-    });
-  }
+      libl, sql,
+      parm1: fileName, parm2: libName, debug: 'N'
+    };
 
-  return rows;
+    const query = object_toQueryString(params);
+    const url_query = url + '?' + query;
+
+    const response = await axios({
+      method: 'get', url: url_query, responseType: 'json'
+    });
+
+    let rows = await response.data;
+
+    // filter on member name.
+    if (mbrName)
+    {
+      // mbrName as generic name.
+
+      rows = rows.filter((item: any) =>
+      {
+        const item_mbrName = item.MBRNAME.trimRight();
+        if (mbrName.endsWith('*'))
+        {
+          return string_matchGeneric(item_mbrName, mbrName);
+        }
+        else
+        {
+          return (string_rtrim(item.MBRNAME).indexOf(mbrName) >= 0);
+        }
+      });
+    }
+    resolve(rows) ;
+  }) ;
+  return promise ;
 }
 
 // --------------------- as400_tablesAndViews_select -----------------------
