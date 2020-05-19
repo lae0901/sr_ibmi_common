@@ -2,6 +2,9 @@
 
 ## source file functions
 * as400_srcfList(objName: string, libName: string) : Promise<{}[]>
+* as400_compile(config:{CURLIB:string, LIBL:string}, 
+          srcfName:string, srcfLib:string, srcmbr:string) :
+      Promise<{compMsg:string, compile:string[], joblog:string[]}>
 
 ## publish instructions
 * increment version number in package.json
