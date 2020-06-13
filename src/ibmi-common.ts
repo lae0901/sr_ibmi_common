@@ -16,6 +16,18 @@ export interface iDspfd_mbrlist
   SRCTYPE: string
 };
 
+// -------------------------- iOptions -------------------------
+// options passed to server REST API.
+// serverUrl: url of the server.  http://192.168.1.170:10080
+// numRows: max number of rows to return
+// libl: library list when api runs on server
+interface iOptions
+{
+  serverUrl?: string,
+  numRows?: number,
+  libl?: string
+}
+
 // --------------------- as400_compile -----------------------
 export async function as400_compile(config:{CURLIB:string, LIBL:string}, 
           srcfName:string, srcfLib:string, srcmbr:string) :
@@ -59,19 +71,19 @@ export async function as400_compile(config:{CURLIB:string, LIBL:string},
 }
 
 // --------------------- as400_srcfList -----------------------
-export function as400_srcfList(objName: string, libName: string) : Promise<{}[]>
+export function as400_srcfList(objName: string, libName: string, options?: iOptions) : Promise<{}[]>
 {
   const promise = new Promise<{}[]> (async (resolve, reject) =>
   {
-    const libl = 'couri7 aplusb1fcc qtemp';
-    const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
+    options = options || {} ;
+    const serverUrl = options.serverUrl || 'http://173.54.20.170:10080' ;
+    const libl = options.libl || 'couri7 aplusb1fcc qtemp';
+    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
     const params =
     {
       libl, proc: 'utl8020_srcfList',
       parm1: objName, parm2: libName, debug: 'N'
     };
-    // const query = object_toQueryString(params);
-    // const url_query = url + '?' + query;
 
     const response = await axios({
       method: 'get', url, data: params, responseType: 'json'
@@ -147,13 +159,17 @@ return promise ;
 
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.
-export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string = '')
+export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string = '', 
+        options?: iOptions )
   : Promise<iDspfd_mbrlist[]>
 {
   const promise = new Promise< iDspfd_mbrlist[]>(async (resolve, reject) =>
   {
-    const libl = 'couri7 aplusb1fcc qtemp';
-    const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
+    options = options || {};
+    const serverUrl = options.serverUrl || 'http://173.54.20.170:10080';
+    const libl = options.libl || 'couri7 aplusb1fcc qtemp';
+    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
+
     const sql = 'select    a.* ' +
       'from      table(system_dspfd_mbrlist(?,?)) a ' +
       'order by  a.mbrname ';

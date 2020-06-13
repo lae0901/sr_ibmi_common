@@ -9,6 +9,11 @@ export interface iDspfd_mbrlist {
     MBRTEXT: string;
     SRCTYPE: string;
 }
+interface iOptions {
+    serverUrl?: string;
+    numRows?: number;
+    libl?: string;
+}
 export declare function as400_compile(config: {
     CURLIB: string;
     LIBL: string;
@@ -17,16 +22,17 @@ export declare function as400_compile(config: {
     compile: string[];
     joblog: string[];
 }>;
-export declare function as400_srcfList(objName: string, libName: string): Promise<{}[]>;
+export declare function as400_srcfList(objName: string, libName: string, options?: iOptions): Promise<{}[]>;
 export declare function as400_routines(libName: string, routineName: string): Promise<{}[]>;
 export declare function as400_srcmbrLines(libName: string, fileName: string, mbrName: string): Promise<{
     SEQNBR: string;
     CHGDATE: string;
     TEXT: string;
 }[]>;
-export declare function as400_srcmbrList(libName: string, fileName: string, mbrName?: string): Promise<iDspfd_mbrlist[]>;
+export declare function as400_srcmbrList(libName: string, fileName: string, mbrName?: string, options?: iOptions): Promise<iDspfd_mbrlist[]>;
 export declare function as400_tablesAndViews_select(schema: string, collName: string, maxRows?: number): Promise<[{
     SCHEMA: string;
     COLLNAME: string;
     COLLTYPE: string;
 }]>;
+export {};
