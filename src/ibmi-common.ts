@@ -29,7 +29,7 @@ interface iOptions
   curlib?: string
 }
 
-interface iCompileLine
+export interface iCompileLine
 {
   SKIPBFR: string,
   SPACEB: string,

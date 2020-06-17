@@ -15,7 +15,7 @@ interface iOptions {
     libl?: string;
     curlib?: string;
 }
-interface iCompileLine {
+export interface iCompileLine {
     SKIPBFR: string;
     SPACEB: string;
     LINE: string;
