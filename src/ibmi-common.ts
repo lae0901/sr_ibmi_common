@@ -25,27 +25,37 @@ interface iOptions
 {
   serverUrl?: string,
   numRows?: number,
-  libl?: string
+  libl?: string,
+  curlib?: string
+}
+
+interface iCompileLine
+{
+  SKIPBFR: string,
+  SPACEB: string,
+  LINE: string
 }
 
 // --------------------- as400_compile -----------------------
-export async function as400_compile(config:{CURLIB:string, LIBL:string}, 
-          srcfName:string, srcfLib:string, srcmbr:string) :
-      Promise<{compMsg:string, compile:string[], joblog:string[]}>
+export async function as400_compile( 
+      srcfName:string, srcfLib:string, 
+      srcmbr:string, options:iOptions ) :
+      Promise<{compMsg:string, compile:iCompileLine[], joblog:string[]}>
 {
-  const promise = new Promise<{ compMsg: string, compile: string[], joblog: string[] }> 
+  const promise = new Promise<{ compMsg: string, compile: iCompileLine[], joblog: string[] }> 
     ( async (resolve, reject) =>
   {
     srcfName = srcfName || '';
     srcfLib = srcfLib || '';
     srcmbr = srcmbr || '';
-    const libl = string_rtrim(config.LIBL);
-    const curlib = config.CURLIB;
+    const libl = options.libl || 'QGPL QTEMP';
+    const curlib = options.curlib || '';
+    const serverUrl = options.serverUrl || '' ;
     let compMsg = '';
-    let compile:string[] = [] ;
+    let compile:iCompileLine[] = [] ;
     let joblog:string[] = [] ;
 
-    const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
+    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
     const params = 
     {
       libl, proc: 'utl7960_compile', 

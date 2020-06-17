@@ -13,13 +13,16 @@ interface iOptions {
     serverUrl?: string;
     numRows?: number;
     libl?: string;
+    curlib?: string;
 }
-export declare function as400_compile(config: {
-    CURLIB: string;
-    LIBL: string;
-}, srcfName: string, srcfLib: string, srcmbr: string): Promise<{
+interface iCompileLine {
+    SKIPBFR: string;
+    SPACEB: string;
+    LINE: string;
+}
+export declare function as400_compile(srcfName: string, srcfLib: string, srcmbr: string, options: iOptions): Promise<{
     compMsg: string;
-    compile: string[];
+    compile: iCompileLine[];
     joblog: string[];
 }>;
 export declare function as400_srcfList(objName: string, libName: string, options?: iOptions): Promise<{}[]>;

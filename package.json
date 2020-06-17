@@ -1,11 +1,11 @@
 {
   "name": "sr_ibmi_common",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "ibmi common code used from vscode extension",
   "main": "lib/ibmi-common.js",
   "types": "lib/ibmi-common.d.ts",
   "scripts": {
-    "test": "jest --config jestconfig.json",
+    "test": "node ./lib/tests/as400_tests.js",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
