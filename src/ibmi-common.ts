@@ -2,6 +2,7 @@
 
 import { object_toQueryString, string_rtrim, string_matchGeneric } from 'sr_core_ts';
 import axios from 'axios';
+import * as querystring from 'querystring';
 
 export interface iDspfd_mbrlist
 {
@@ -34,6 +35,45 @@ export interface iCompileLine
   SKIPBFR: string,
   SPACEB: string,
   LINE: string
+}
+
+// --------------------- as400_addpfm -----------------------
+export async function as400_addpfm(
+  fileName: string, libName: string, mbrName: string, 
+  textDesc: string, srcType: string, options: iOptions):
+  Promise<{ errmsg: string }>
+{
+  const promise = new Promise<{ errmsg: string }>
+    (async (resolve, reject) =>
+    {
+      fileName = fileName || '';
+      libName = libName || '';
+      mbrName = mbrName || '';
+      const libl = options.libl || 'QGPL QTEMP';
+      const curlib = options.curlib || '';
+      const serverUrl = options.serverUrl || '';
+      let errmsg = '';
+
+      const url = `${serverUrl}/coder/common/json_runSqlReturnEmpty.php`;
+      const params =
+      {
+        libl, proc: 'system_addpfm',
+        outParm1: errmsg, parm2: fileName,
+        parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
+      }
+      const query = object_toQueryString(params);
+      const url_query = url + '?' + query;
+
+      const response = await axios({
+        method: 'get', url: url_query, responseType: 'json'
+      });
+
+      let data = await response.data;
+      errmsg = data.outParm1.trim( );
+      resolve({ errmsg });
+    });
+
+  return promise;
 }
 
 // --------------------- as400_compile -----------------------
@@ -76,6 +116,44 @@ export async function as400_compile(
     joblog  = data.set2 || [] ;
     resolve( { compMsg, compile, joblog });
   });
+
+  return promise;
+}
+
+// --------------------- as400_rmvm -----------------------
+export async function as400_rmvm(
+  fileName: string, libName: string, mbrName: string, options: iOptions):
+  Promise<{ errmsg: string }>
+{
+  const promise = new Promise<{ errmsg: string }>
+    (async (resolve, reject) =>
+    {
+      fileName = fileName || '';
+      libName = libName || '';
+      mbrName = mbrName || '';
+      const libl = options.libl || 'QGPL QTEMP';
+      const curlib = options.curlib || '';
+      const serverUrl = options.serverUrl || '';
+      let errmsg = '';
+
+      const url = `${serverUrl}/coder/common/json_runSqlReturnEmpty.php`;
+      const params =
+      {
+        libl, proc: 'system_rmvm',
+        outParm1: errmsg, parm2: fileName,
+        parm3: libName, parm4: mbrName
+      }
+      const query = object_toQueryString(params);
+      const url_query = url + '?' + query;
+
+      const response = await axios({
+        method: 'get', url: url_query, responseType: 'json'
+      });
+
+      let data = await response.data;
+      errmsg = data.outParm1.trim( );
+      resolve({ errmsg });
+    });
 
   return promise;
 }

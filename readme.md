@@ -1,9 +1,11 @@
 # sr_ibmi_common - functions used to access ibm i from vscode.
 
 ## source file functions
+* const { errmsg } = await as400_addpfm( fileName, libName, mbrName, textDesc, srcType, options );
 * as400_srcfList(objName: string, libName: string) : Promise<{}[]>
 * as400_compile( srcfName:string, srcfLib:string, srcmbr:string, iOptions) :
       Promise<{compMsg:string, compile:iCompileLine[], joblog:string[]}>
+* const { errmsg } = await as400_rmvm( fileName, libName, mbrName, options )
 
 ## interfaces
 ```

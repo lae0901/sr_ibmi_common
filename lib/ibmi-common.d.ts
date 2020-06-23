@@ -20,10 +20,16 @@ export interface iCompileLine {
     SPACEB: string;
     LINE: string;
 }
+export declare function as400_addpfm(fileName: string, libName: string, mbrName: string, textDesc: string, srcType: string, options: iOptions): Promise<{
+    errmsg: string;
+}>;
 export declare function as400_compile(srcfName: string, srcfLib: string, srcmbr: string, options: iOptions): Promise<{
     compMsg: string;
     compile: iCompileLine[];
     joblog: string[];
+}>;
+export declare function as400_rmvm(fileName: string, libName: string, mbrName: string, options: iOptions): Promise<{
+    errmsg: string;
 }>;
 export declare function as400_srcfList(objName: string, libName: string, options?: iOptions): Promise<{}[]>;
 export declare function as400_routines(libName: string, routineName: string): Promise<{}[]>;
