@@ -5,6 +5,15 @@ export interface iTesterResults
   errmsg_arr: string[]
 };
 
+
+type PassFail = 'pass' | 'fail' ;
+
+export interface iTesterResultItem
+{
+  passFail : PassFail,
+  text: string
+}
+
 // ----------------------------- testerResults_append -----------------------------
 export function testerResults_append(testerResults: iTesterResults,
   completion_arr: string[], errmsg_arr: string[])
