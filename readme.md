@@ -6,6 +6,7 @@
 * as400_compile( srcfName:string, srcfLib:string, srcmbr:string, iOptions) :
       Promise<{compMsg:string, compile:iCompileLine[], joblog:string[]}>
 * const { errmsg } = await as400_rmvm( fileName, libName, mbrName, options )
+* iSrcmbrLine[] = await as400_srcmbrLines( lib, file, srcmbr )
 
 ## interfaces
 ```
@@ -28,11 +29,19 @@ interface iCompileLine
   SPACEB: string,
   LINE: string
 }
+
+export interface iSrcmbrLine
+{
+  SEQNBR: string,
+  CHGDATE: string,
+  TEXT: string
+}
 ```      
 
 ## publish instructions
 * increment version number in package.json
 * npm run build
+* npm run test
 * git add, commit, push to repo
 * npm publish
 * npm update in projects which use this package

@@ -20,6 +20,11 @@ export interface iCompileLine {
     SPACEB: string;
     LINE: string;
 }
+export interface iSrcmbrLine {
+    SEQNBR: string;
+    CHGDATE: string;
+    TEXT: string;
+}
 export declare function as400_addpfm(fileName: string, libName: string, mbrName: string, textDesc: string, srcType: string, options: iOptions): Promise<{
     errmsg: string;
 }>;
@@ -33,11 +38,7 @@ export declare function as400_rmvm(fileName: string, libName: string, mbrName: s
 }>;
 export declare function as400_srcfList(objName: string, libName: string, options?: iOptions): Promise<{}[]>;
 export declare function as400_routines(libName: string, routineName: string): Promise<{}[]>;
-export declare function as400_srcmbrLines(libName: string, fileName: string, mbrName: string): Promise<{
-    SEQNBR: string;
-    CHGDATE: string;
-    TEXT: string;
-}[]>;
+export declare function as400_srcmbrLines(libName: string, fileName: string, mbrName: string): Promise<iSrcmbrLine[]>;
 export declare function as400_srcmbrList(libName: string, fileName: string, mbrName?: string, options?: iOptions): Promise<iDspfd_mbrlist[]>;
 export declare function as400_tablesAndViews_select(schema: string, collName: string, maxRows?: number): Promise<[{
     SCHEMA: string;

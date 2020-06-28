@@ -37,6 +37,13 @@ export interface iCompileLine
   LINE: string
 }
 
+export interface iSrcmbrLine
+{
+  SEQNBR: string,
+  CHGDATE: string,
+  TEXT: string
+}
+
 // --------------------- as400_addpfm -----------------------
 export async function as400_addpfm(
   fileName: string, libName: string, mbrName: string, 
@@ -214,9 +221,9 @@ export function as400_routines(libName: string, routineName: string): Promise<{}
 
 // --------------------- as400_srcmbrLines -----------------------
 export async function as400_srcmbrLines(libName: string, fileName: string, mbrName: string)
-  : Promise<{ SEQNBR: string, CHGDATE: string, TEXT: string }[]>
+  : Promise<iSrcmbrLine[]>
 {
-  const promise = new Promise < { SEQNBR: string, CHGDATE: string, TEXT: string }[] >(async (resolve, reject) =>
+  const promise = new Promise<iSrcmbrLine[]>(async (resolve, reject) =>
   {
 
   const libl = 'couri7 aplusb1fcc qtemp';
@@ -228,7 +235,7 @@ export async function as400_srcmbrLines(libName: string, fileName: string, mbrNa
   const params =
   {
     libl, sql,
-    parm1: fileName, parm2: libName, parm3: mbrName, debug: 'N'
+    parm1: fileName, parm2: libName, parm3: mbrName, debug: 'N', joblog:'N'
   };
 
   const query = object_toQueryString(params);
@@ -238,12 +245,44 @@ export async function as400_srcmbrLines(libName: string, fileName: string, mbrNa
     method: 'get', url: url_query, responseType: 'json'
   });
 
-  const rows = await response.data;
+  let rows = await response.data;
+  if ( typeof rows == 'string')
+  {
+    // const { jsonText, errText } = respText_extractErrorText(rows) ;
+    // const data = JSON.parse(jsonText) ;
+    // const ch1 = '1' ;
+  }
 
   resolve(rows);
 }) ;
 return promise ;
 }
+
+// ------------------- respText_extractErrorText ---------------------------
+function respText_extractErrorText(respText:string)
+{
+  let errText = '';
+  let jsonText = '';
+  if ((respText) && (respText.length > 0) && (respText.substr(0, 1) == '<'))
+  {
+    const lines = respText.split('\n');
+    for (let ix = 0; ix < lines.length; ++ix)
+    {
+      const line = lines[ix];
+      if (line.substr(0, 1) == '<')
+        errText += line;
+      else
+        jsonText = line;
+    }
+  }
+  else
+  {
+    jsonText = respText;
+  }
+  return { jsonText, errText };
+}
+
+
 
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.
