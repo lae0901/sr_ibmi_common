@@ -49,8 +49,8 @@ export interface iSrcmbrXref
 {
   ibmi_url?: string
   library: string;
-  srcfile: string[];
-  srctype: string[];
+  srcFiles: string[];
+  srcTypes?: string[];
   members?: string[];
 
   mirror_hold?: boolean;
