@@ -25,6 +25,15 @@ export interface iSrcmbrLine {
     CHGDATE: string;
     TEXT: string;
 }
+export interface iSrcmbrXref {
+    ibmi_url?: string;
+    library: string;
+    srcfile: string[];
+    srctype: string[];
+    members?: string[];
+    mirror_hold?: boolean;
+    srcf_is_master?: boolean;
+}
 export declare function as400_addpfm(fileName: string, libName: string, mbrName: string, textDesc: string, srcType: string, options: iOptions): Promise<{
     errmsg: string;
 }>;

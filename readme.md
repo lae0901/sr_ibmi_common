@@ -36,6 +36,21 @@ export interface iSrcmbrLine
   CHGDATE: string,
   TEXT: string
 }
+
+export interface iSrcmbrXref
+{
+  ibmi_url?: string
+  library: string;
+  srcfile: string[];
+  srctype: string[];
+  members?: string[];
+
+  mirror_hold?: boolean;
+
+  // source file is the master. Files in the srcmbr folder are
+  // removed if they do not exist as srcmbr in source file.
+  srcf_is_master?: boolean;
+}
 ```      
 
 ## publish instructions

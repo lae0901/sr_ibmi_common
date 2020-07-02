@@ -30,7 +30,7 @@ async function async_main()
 // ------------------------------ as400_compile_test ------------------------------
 async function as400_compile_test()
 {
-  const options = {serverUrl:'http://192.168.1.170:10080', curlib:'couri7', 
+  const options = {serverUrl:'http://173.54.20.170:10080', curlib:'couri7', 
                     libl:'couri7 qgpl'};
   const srcfName = 'QRPGLESRC' ;
   const srcfLib = 'COURI7' ;
@@ -58,7 +58,7 @@ async function as400_member_test(): Promise<iTesterResults>
   let textDesc = 'test member' ;
   let srcType = 'TXT' ;
   const libl = 'COURI7 APLUSB1FCC QTEMP' ;
-  const serverUrl = 'http://192.168.1.170:10080' ;
+  const serverUrl = 'http://173.54.20.170:10080' ;
 
   const options = { libl, serverUrl } ;
 
@@ -113,7 +113,7 @@ async function as400_srcmbr_test(): Promise<iTestResultItem[]>
   let libName = 'COURI7';
   let mbrName = 'ACOM0011R';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://192.168.1.170:10080';
+  const serverUrl = 'http://173.54.20.170:10080';
 
   const options = { libl, serverUrl };
 

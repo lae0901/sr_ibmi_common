@@ -44,6 +44,22 @@ export interface iSrcmbrLine
   TEXT: string
 }
 
+// ---------------------------------- iSrcmbrXref ----------------------------------
+export interface iSrcmbrXref
+{
+  ibmi_url?: string
+  library: string;
+  srcfile: string[];
+  srctype: string[];
+  members?: string[];
+
+  mirror_hold?: boolean;
+
+  // source file is the master. Files in the srcmbr folder are
+  // removed if they do not exist as srcmbr in source file.
+  srcf_is_master?: boolean;
+}
+
 // --------------------- as400_addpfm -----------------------
 export async function as400_addpfm(
   fileName: string, libName: string, mbrName: string, 
