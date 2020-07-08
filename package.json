@@ -25,15 +25,15 @@
   },
   "homepage": "https://github.com/lae0901/sr_ibmi_common#readme",
   "devDependencies": {
-    "@types/node": "^13.13.10",
+    "@types/node": "^13.13.13",
     "prettier": "^1.19.1",
-    "sr_test_framework": "^1.0.0",
+    "sr_test_framework": "^1.0.2",
     "tslint": "^6.1.2",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "sr_core_ts": "^1.46.7"
+    "sr_core_ts": "^1.46.16"
   }
 }
