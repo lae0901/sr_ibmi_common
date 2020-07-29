@@ -7,12 +7,12 @@ import * as querystring from 'querystring';
 // ----------------------------------- iIfsItem -----------------------------------
 export interface iIfsItem
 {
-  itemName: string,
-  crtTs: Date,
-  chgTs: Date,
-  size: number,
-  ccsid: number,
-  itemType: '*DIR'|'*STMF'|''
+  ITEMNAME: string,
+  CRTTS: Date,
+  CHGTS: Date,
+  SIZE: number,
+  CCSID: number,
+  ITEMTYPE: '*DIR'|'*STMF'|''
 }
 
 // --------------------- ibmi_ifs_getItems -----------------------
