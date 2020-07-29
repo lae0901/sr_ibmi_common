@@ -1,3 +1,5 @@
+import { iIfsItem, ibmi_ifs_getItems } from './ibmi-ifs';
+export { iIfsItem, ibmi_ifs_getItems };
 export interface iDspfd_mbrlist {
     FILENAME: string;
     LIBNAME: string;
@@ -54,4 +56,3 @@ export declare function as400_tablesAndViews_select(schema: string, collName: st
     COLLNAME: string;
     COLLTYPE: string;
 }]>;
-export {};

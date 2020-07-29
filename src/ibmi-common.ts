@@ -3,6 +3,9 @@
 import { object_toQueryString, string_rtrim, string_matchGeneric } from 'sr_core_ts';
 import axios from 'axios';
 import * as querystring from 'querystring';
+import {  iIfsItem, ibmi_ifs_getItems } from './ibmi-ifs';
+
+export { iIfsItem, ibmi_ifs_getItems} ;
 
 export interface iDspfd_mbrlist
 {

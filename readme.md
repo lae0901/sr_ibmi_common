@@ -8,6 +8,9 @@
 * const { errmsg } = await as400_rmvm( fileName, libName, mbrName, options )
 * iSrcmbrLine[] = await as400_srcmbrLines( lib, file, srcmbr )
 
+## ibm i ifs functions
+* iIfsItem[] = await ibmi_ifs_getItems( dirPath, itemName, filter_itemType )
+
 ## interfaces
 ```
 // -------------------------- iOptions -------------------------
