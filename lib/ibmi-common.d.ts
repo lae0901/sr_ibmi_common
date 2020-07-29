@@ -1,5 +1,5 @@
-import { iIfsItem, ibmi_ifs_getItems } from './ibmi-ifs';
-export { iIfsItem, ibmi_ifs_getItems };
+import { iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents } from './ibmi-ifs';
+export { iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents };
 export interface iDspfd_mbrlist {
     FILENAME: string;
     LIBNAME: string;

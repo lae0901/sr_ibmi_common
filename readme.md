@@ -10,6 +10,7 @@
 
 ## ibm i ifs functions
 * iIfsItem[] = await ibmi_ifs_getItems( dirPath, itemName, filter_itemType )
+* data = await ibmi_ifs_getFileContents( filePath )
 
 ## interfaces
 ```

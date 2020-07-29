@@ -3,7 +3,7 @@ import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines } from '../ibmi-common';
 import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
-import { ibmi_ifs_getItems } from '../ibmi-ifs';
+import { ibmi_ifs_getItems, ibmi_ifs_getFileContents } from '../ibmi-ifs';
 
 // run main function that is declared as async. 
 async_main();
@@ -138,6 +138,27 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
 async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
+
+  // ifs_ibmi_getItems
+  {
+    const {results:res} = await ifs_ibmi_getItems() ;
+    results.push(...res);
+  }
+
+  // ifs_ibmi_getFileContents
+  {
+    const { results: res } = await ifs_ibmi_getFileContents();
+    results.push(...res);
+  }
+
+  return { results }
+}
+
+// ---------------------------------- ifs_ibmi_getItems ----------------------------------
+// add and remove member from file.
+async function ifs_ibmi_getItems(): Promise<{ results: iTestResultItem[] }>
+{
+  const results = testResults_new();
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
   const serverUrl = 'http://173.54.20.170:10080';
@@ -146,10 +167,10 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
   {
     method = 'ibmi_ifs_getItems';
     let passText = '';
-    let errmsg = '' ;
-    const dirPath = '/home/srichter' ;
-    const itemName = '' ;
-    const itemType = '' ;
+    let errmsg = '';
+    const dirPath = '/home/srichter';
+    const itemName = '';
+    const itemType = '';
     const items = await ibmi_ifs_getItems(dirPath, itemName, itemType);
     if (items.length > 0)
     {
@@ -157,6 +178,37 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
     }
     else
       errmsg = `error reading items from folder ${dirPath}`;
+
+    testResults_append(results, passText, errmsg, method);
+  }
+
+  return { results }
+}
+
+// ------------------------------ ifs_ibmi_getFileContents --------------------
+// add and remove member from file.
+async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }>
+{
+  const results = testResults_new();
+  let method = '';
+  const libl = 'COURI7 APLUSB1FCC QTEMP';
+  const serverUrl = 'http://173.54.20.170:10080';
+
+  // ibmi_ifs_getFileContents
+  {
+    method = 'ibmi_ifs_getFileContents';
+    let passText = '';
+    let errmsg = '';
+    const filePath = '/home/srichter/abc.pdf';
+    const itemName = '';
+    const itemType = '';
+    const items = await ibmi_ifs_getFileContents( filePath );
+    if (items.length > 0)
+    {
+      passText = `read file contents from ifs file ${filePath}.`;
+    }
+    else
+      errmsg = `error reading file contents from folder ${filePath}`;
 
     testResults_append(results, passText, errmsg, method);
   }
