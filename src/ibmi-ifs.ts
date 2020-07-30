@@ -56,15 +56,13 @@ export async function ibmi_ifs_getItems( dirPath: string, itemName: string, item
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text
 export async function ibmi_ifs_getFileContents( filePath:string, returnType = 'buf') :
-Promise<string|any>
+Promise<Buffer>
 {
   let ifsFilePath = filePath ;
-  const promise = new Promise<string|any>(async (resolve, reject) =>
+  const promise = new Promise<Buffer>(async (resolve, reject) =>
   {
-    // ifsFilePath = encodeURIComponent( ifsFilePath );
-
     const libl = 'couri7 aplusb1fcc qtemp';
-    const url = 'http://173.54.20.170:10080/coder/php/ifs-file-get-contents-nologin.php';
+    const url = 'http://173.54.20.170:10080/coder/php/ifs-file-get-contents-base64.php';
 
     const params =
     {
@@ -76,20 +74,11 @@ Promise<string|any>
     const url_query = url + '?' + query;
 
     const response = await axios({
-      method: 'get', url: url_query, responseType: 'text'
+      method: 'get', url: url_query, responseType: 'blob'
     });
 
-    if (returnType == 'buf')
-    {
-      // const buf = await (response as any).arrayBuffer();
-      const buf = response.data ;
-      resolve(buf);
-    }
-    else
-    {
-      const text = await (response as any).text();
-      resolve(text);
-    }
+    const buf = Buffer.from(response.data, 'base64');
+    resolve(buf);
   });
   return promise;
 }

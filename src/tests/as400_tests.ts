@@ -1,9 +1,11 @@
-import { object_toQueryString, string_rtrim, string_matchGeneric } from 'sr_core_ts';
+import { system_downloadsFolder, object_toQueryString, string_rtrim, string_matchGeneric, file_writeNew } from 'sr_core_ts';
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines } from '../ibmi-common';
 import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents } from '../ibmi-ifs';
+import path = require('path');
+import * as fs from 'fs' ;
 
 // run main function that is declared as async. 
 async_main();
@@ -202,13 +204,25 @@ async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }
     const filePath = '/home/srichter/abc.pdf';
     const itemName = '';
     const itemType = '';
-    const items = await ibmi_ifs_getFileContents( filePath );
-    if (items.length > 0)
+    const buf = await ibmi_ifs_getFileContents( filePath );
+    if (buf.length > 0)
     {
       passText = `read file contents from ifs file ${filePath}.`;
+
+      const toPath = system_downloadsFolder() ;
+      const fileName = path.parse(filePath).base;
+      const toFilePath = path.join(toPath, fileName) ;
+
+      // {
+      //   fs.writeFile(toFilePath, buf, 'binary', (err) =>
+      //   {
+      //   });
+      // }
     }
     else
+    {
       errmsg = `error reading file contents from folder ${filePath}`;
+    }
 
     testResults_append(results, passText, errmsg, method);
   }
