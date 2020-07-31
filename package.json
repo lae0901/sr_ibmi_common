@@ -1,6 +1,6 @@
 {
   "name": "sr_ibmi_common",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "ibmi common code used from vscode extension",
   "main": "lib/ibmi-common.js",
   "types": "lib/ibmi-common.d.ts",
@@ -34,6 +34,6 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "sr_core_ts": "^1.46.19"
+    "sr_core_ts": "^1.46.22"
   }
 }

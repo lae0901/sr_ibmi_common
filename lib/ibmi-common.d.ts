@@ -56,3 +56,4 @@ export declare function as400_tablesAndViews_select(schema: string, collName: st
     COLLNAME: string;
     COLLTYPE: string;
 }]>;
+export declare function sqlTimestamp_toJavascriptDate(sql_ts: string): Date;

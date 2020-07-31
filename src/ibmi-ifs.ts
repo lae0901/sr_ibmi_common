@@ -1,18 +1,19 @@
 // /src/ibmi-ifs.ts
 
-import { object_toQueryString, string_rtrim, string_matchGeneric } from 'sr_core_ts';
+import { object_toQueryString, string_rtrim, string_matchGeneric, string_assignSubstr } from 'sr_core_ts';
 import axios from 'axios';
 import * as querystring from 'querystring';
+import { sqlTimestamp_toJavascriptDate } from './ibmi-common';
 
 // ----------------------------------- iIfsItem -----------------------------------
 export interface iIfsItem
 {
-  ITEMNAME: string,
-  CRTTS: Date,
-  CHGTS: Date,
-  SIZE: number,
-  CCSID: number,
-  ITEMTYPE: '*DIR'|'*STMF'|''
+  itemName: string,
+  crtDate: Date,
+  chgDate: Date,
+  size: number,
+  ccsid: number,
+  itemType: '*DIR'|'*STMF'|''
 }
 
 // --------------------- ibmi_ifs_getItems -----------------------
@@ -41,12 +42,15 @@ export async function ibmi_ifs_getItems( dirPath: string, itemName: string, item
     });
 
     let rows = await response.data;
-    if (typeof rows == 'string')
+
+    // convert create and change timestamps to javascript date fields.
+    rows = rows.map((item:any) =>
     {
-      // const { jsonText, errText } = respText_extractErrorText(rows) ;
-      // const data = JSON.parse(jsonText) ;
-      // const ch1 = '1' ;
-    }
+      const {ITEMNAME:itemName, SIZE:size, CCSID:ccsid, ITEMTYPE:itemType } = item ;
+      const chgDate = sqlTimestamp_toJavascriptDate(item.CHGTS) ;
+      const crtDate = sqlTimestamp_toJavascriptDate(item.CRTTS) ;
+      return { itemName, chgDate, crtDate, size, ccsid, itemType };
+    });
 
     resolve(rows);
   });
@@ -56,7 +60,7 @@ export async function ibmi_ifs_getItems( dirPath: string, itemName: string, item
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text
 export async function ibmi_ifs_getFileContents( filePath:string, returnType = 'buf') :
-Promise<Buffer>
+          Promise<Buffer>
 {
   let ifsFilePath = filePath ;
   const promise = new Promise<Buffer>(async (resolve, reject) =>

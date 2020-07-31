@@ -1,6 +1,6 @@
 // media/ibmi_common.ts
 
-import { object_toQueryString, string_rtrim, string_matchGeneric } from 'sr_core_ts';
+import { object_toQueryString, string_rtrim, string_matchGeneric, string_assignSubstr } from 'sr_core_ts';
 import axios from 'axios';
 import * as querystring from 'querystring';
 import {  iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents } from './ibmi-ifs';
@@ -381,4 +381,17 @@ export async function as400_tablesAndViews_select(schema: string, collName: stri
   const rows = await response.data;
 
   return rows;
+}
+
+// ------------------------- sqlTimestamp_toJavascriptDate -------------------------
+// first, convert SQL timestamp to ISO timestamp
+// 2011-10-05.  2011-10-05T14:48:00.000Z
+// then create a javascript Date from the ISO timestamp.
+export function sqlTimestamp_toJavascriptDate( sql_ts:string ) : Date
+{
+  let iso_ts = string_assignSubstr( sql_ts, 10, 1, 'T');
+  iso_ts = iso_ts.replace(/\./g, ':');
+  iso_ts = string_assignSubstr(iso_ts, 19, -1, '.000Z');
+  const dt = new Date(iso_ts);
+  return dt ;
 }
