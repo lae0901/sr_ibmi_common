@@ -181,10 +181,33 @@ async function ifs_ibmi_getItems(): Promise<{ results: iTestResultItem[] }>
     else
       errmsg = `error reading items from folder ${dirPath}`;
 
+    for( const item of items)
+    {
+      const chgDate = new Date(item.CHGTS) ;
+      const crtDate = new Date(item.CRTTS) ;
+      console.log(`name:${item.ITEMNAME} chgts:${item.CHGTS}`);
+    }
+
     testResults_append(results, passText, errmsg, method);
   }
 
   return { results }
+}
+
+// ------------------------------ string_assignSubstr ------------------------------
+function string_assignSubstr(str:string, start:number, length:number, vlu:string) : string
+{
+  let before_text = '' ;
+  let after_text = '' ;
+  const before_length = start ;
+  const after_start = start + length ;
+  const after_length = str.length - after_start ;
+  if ( before_length )
+    before_text = str.substr(0, before_length) ;
+  if ( after_length )
+    after_text = str.substr(after_start, after_length) ;
+  const result = before_text + vlu + after_text ;
+  return result ;
 }
 
 // ------------------------------ ifs_ibmi_getFileContents --------------------
