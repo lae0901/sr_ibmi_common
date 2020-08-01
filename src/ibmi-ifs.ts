@@ -17,10 +17,13 @@ export interface iIfsItem
 }
 
 // --------------------- ibmi_ifs_getItems -----------------------
-export async function ibmi_ifs_getItems( dirPath: string, itemName: string, itemType: string)
-  : Promise<iIfsItem[]>
+// options:{filterItemName:string, filterItemType:string, joblog:'N'}
+export async function ibmi_ifs_getItems( 
+  dirPath: string,
+  options?:{filterItemName?:string, filterItemType?:string, joblog?:'Y'|'N'} )
+  : Promise<{rows:iIfsItem[],errmsg:string}>
 {
-  const promise = new Promise<iIfsItem[]>(async (resolve, reject) =>
+  const promise = new Promise<{rows:iIfsItem[],errmsg:string}>(async (resolve, reject) =>
   {
     const libl = 'couri7 aplusb1fcc qtemp';
     const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
@@ -28,10 +31,16 @@ export async function ibmi_ifs_getItems( dirPath: string, itemName: string, item
       'from      table(utl8022_ifsItems(?,?,?)) a ' +
       'order by  a.itemName ';
 
+    options = options || {} ;
+    const filterItemName = options.filterItemName || '' ;
+    const filterItemType = options.filterItemType || '' ;
+    const joblog = options.joblog || 'N' ;
+
     const params =
     {
       libl, sql,
-      parm1: dirPath, parm2: itemName, parm3: itemType, debug: 'N', joblog: 'N'
+      parm1: dirPath, parm2: filterItemName, parm3: filterItemType, 
+      debug: 'N', joblog
     };
 
     const query = object_toQueryString(params);
@@ -41,18 +50,27 @@ export async function ibmi_ifs_getItems( dirPath: string, itemName: string, item
       method: 'get', url: url_query, responseType: 'json'
     });
 
+    let errmsg = '' ;
     let rows = await response.data;
 
-    // convert create and change timestamps to javascript date fields.
-    rows = rows.map((item:any) =>
+    if ( typeof rows == 'string')
     {
-      const {ITEMNAME:itemName, SIZE:size, CCSID:ccsid, ITEMTYPE:itemType } = item ;
-      const chgDate = sqlTimestamp_toJavascriptDate(item.CHGTS) ;
-      const crtDate = sqlTimestamp_toJavascriptDate(item.CRTTS) ;
-      return { itemName, chgDate, crtDate, size, ccsid, itemType };
-    });
+      errmsg = rows as string ;
+      rows = [] ;
+    }
+    else
+    {
+      // convert create and change timestamps to javascript date fields.
+      rows = rows.map((item:any) =>
+      {
+        const {ITEMNAME:itemName, SIZE:size, CCSID:ccsid, ITEMTYPE:itemType } = item ;
+        const chgDate = sqlTimestamp_toJavascriptDate(item.CHGTS) ;
+        const crtDate = sqlTimestamp_toJavascriptDate(item.CRTTS) ;
+        return { itemName, chgDate, crtDate, size, ccsid, itemType };
+      });
+    }
 
-    resolve(rows);
+    resolve({rows,errmsg});
   });
   return promise;
 }

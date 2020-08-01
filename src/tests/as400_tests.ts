@@ -148,6 +148,12 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
     results.push(...res);
   }
 
+  // ifs_ibmi_getItems_err
+  {
+    const { results: res } = await ifs_ibmi_getItems_err();
+    results.push(...res);
+  }
+
   // ifs_ibmi_getFileContents
   {
     const { results: res } = await ifs_ibmi_getFileContents();
@@ -178,10 +184,43 @@ async function ifs_ibmi_getItems(): Promise<{ results: iTestResultItem[] }>
     let passText = '';
     let errmsg = '';
     const dirPath = '/home/srichter';
-    const itemName = '';
-    const itemType = '';
-    const items = await ibmi_ifs_getItems(dirPath, itemName, itemType);
-    if (items.length > 0)
+    const {rows, errmsg:errText} = await ibmi_ifs_getItems(
+      dirPath, {});
+    if (errText)
+      errmsg = `get items from folder ${dirPath} error ${errText}`;
+    else if (rows.length > 0)
+    {
+      passText = `read ifs items from folder ${dirPath}.`;
+    }
+    else
+      errmsg = `no items returned from folder ${dirPath}`;
+
+    testResults_append(results, passText, errmsg, method);
+  }
+
+  return { results }
+}
+
+// ---------------------------------- ifs_ibmi_getItems_err ----------------------------------
+// add and remove member from file.
+async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
+{
+  const results = testResults_new();
+  let method = '';
+  const libl = 'COURI7 APLUSB1FCC QTEMP';
+  const serverUrl = 'http://173.54.20.170:10080';
+
+  // ibmi_ifs_getItems
+  {
+    method = 'ibmi_ifs_getItems';
+    let passText = '';
+    let errmsg = '';
+    const dirPath = '/home/srichter/.config';
+    const { rows, errmsg: errText } = await ibmi_ifs_getItems(
+      dirPath, { joblog:'N'});
+    if (errText)
+      errmsg = `get items from folder ${dirPath} error ${errText}`;
+    else if (rows.length > 0)
     {
       passText = `read ifs items from folder ${dirPath}.`;
     }
