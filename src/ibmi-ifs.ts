@@ -60,10 +60,10 @@ export async function ibmi_ifs_getItems( dirPath: string, itemName: string, item
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text
 export async function ibmi_ifs_getFileContents( filePath:string, returnType = 'buf') :
-          Promise<Buffer>
+          Promise<{buf:Buffer,errmsg:string}>
 {
   let ifsFilePath = filePath ;
-  const promise = new Promise<Buffer>(async (resolve, reject) =>
+  const promise = new Promise<{ buf: Buffer, errmsg: string }>(async (resolve, reject) =>
   {
     const libl = 'couri7 aplusb1fcc qtemp';
     const url = 'http://173.54.20.170:10080/coder/php/ifs-file-get-contents-base64.php';
@@ -82,7 +82,17 @@ export async function ibmi_ifs_getFileContents( filePath:string, returnType = 'b
     });
 
     const buf = Buffer.from(response.data, 'base64');
-    resolve(buf);
+
+    // check if return data is an errmsg.
+    let errmsg = '' ;
+    if ( buf.length <= 2000 )
+    {
+      const text = buf.toString( ) ;
+      if ((text.length >= 50) && ( text.substr(0,12) == 'error. open '))
+        errmsg = text ;
+    }
+
+    resolve({buf,errmsg});
   });
   return promise;
 }

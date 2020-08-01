@@ -154,6 +154,12 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
     results.push(...res);
   }
 
+  // ifs_ibmi_getFileContents_notFound
+  {
+    const { results: res } = await ifs_ibmi_getFileContents_notFound();
+    results.push(...res);
+  }
+
   return { results }
 }
 
@@ -205,24 +211,53 @@ async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }
     const filePath = '/home/srichter/abc.pdf';
     const itemName = '';
     const itemType = '';
-    const buf = await ibmi_ifs_getFileContents( filePath );
-    if (buf.length > 0)
+    const {buf, errmsg:errText } = await ibmi_ifs_getFileContents( filePath );
+    if ( errText )
+      errmsg = `file ${filePath} read error ${errText}`;
+    else if (buf.length > 0)
     {
       passText = `read file contents from ifs file ${filePath}.`;
 
       const toPath = system_downloadsFolder() ;
       const fileName = path.parse(filePath).base;
       const toFilePath = path.join(toPath, fileName) ;
-
-      // {
-      //   fs.writeFile(toFilePath, buf, 'binary', (err) =>
-      //   {
-      //   });
-      // }
     }
     else
     {
       errmsg = `error reading file contents from folder ${filePath}`;
+    }
+
+    testResults_append(results, passText, errmsg, method);
+  }
+
+  return { results }
+}
+
+// ------------------------------ ifs_ibmi_getFileContents_notFound --------------------
+// add and remove member from file.
+async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResultItem[] }>
+{
+  const results = testResults_new();
+  let method = '';
+  const libl = 'COURI7 APLUSB1FCC QTEMP';
+  const serverUrl = 'http://173.54.20.170:10080';
+
+  // ibmi_ifs_getFileContents
+  {
+    method = 'ibmi_ifs_getFileContents';
+    let passText = '';
+    let errmsg = '';
+    const filePath = '/home/srichter/abc xyz.pdf';  // file is not found.
+    const itemName = '';
+    const itemType = '';
+    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath);
+    if (errText)
+    {
+      passText = `correctly detected file not found. file ${filePath}.`;
+    }
+    else
+    {
+      errmsg = `did not detect file not found error. File ${filePath}`;
     }
 
     testResults_append(results, passText, errmsg, method);
