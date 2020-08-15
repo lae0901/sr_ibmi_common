@@ -4,7 +4,7 @@ import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines } from '../ibmi-common';
 import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
-import { ibmi_ifs_getItems, ibmi_ifs_getFileContents } from '../ibmi-ifs';
+import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem } from '../ibmi-ifs';
 import path = require('path');
 import * as fs from 'fs' ;
 
@@ -142,9 +142,9 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
 
-  // ifs_ibmi_getItems
+  // test_ifs_getItems
   {
-    const {results:res} = await ifs_ibmi_getItems() ;
+    const {results:res} = await test_ifs_getItems() ;
     results.push(...res);
   }
 
@@ -169,26 +169,28 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
   return { results }
 }
 
-// ---------------------------------- ifs_ibmi_getItems ----------------------------------
+// ---------------------------------- test_ifs_getItems ----------------------------------
 // add and remove member from file.
-async function ifs_ibmi_getItems(): Promise<{ results: iTestResultItem[] }>
+async function test_ifs_getItems(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
   const serverUrl = 'http://173.54.20.170:10080';
+  let ifsItems : iIfsItem[] = [] ;
 
   // ibmi_ifs_getItems
   {
-    method = 'ibmi_ifs_getItems';
+    method = 'ibmi_ifs_getItems'; 
     let passText = '';
     let errmsg = '';
     const dirPath = '/home/srichter';
-    const {rows, errmsg:errText} = await ibmi_ifs_getItems(
+    const { rows, errmsg:errText} = await ibmi_ifs_getItems(
       dirPath, {});
+    ifsItems = rows ;
     if (errText)
       errmsg = `get items from folder ${dirPath} error ${errText}`;
-    else if (rows.length > 0)
+    else if (ifsItems.length > 0)
     {
       passText = `read ifs items from folder ${dirPath}.`;
     }
@@ -196,6 +198,15 @@ async function ifs_ibmi_getItems(): Promise<{ results: iTestResultItem[] }>
       errmsg = `no items returned from folder ${dirPath}`;
 
     testResults_append(results, passText, errmsg, method);
+  }
+
+  // test that a specific item was returned in the list of ifs items.
+  {
+    for( const item of ifsItems)
+    {
+      const mtime = item.mtime;
+      const itemName = item.itemName;
+    }
   }
 
   return { results }

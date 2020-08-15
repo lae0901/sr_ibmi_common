@@ -11,9 +11,11 @@ export interface iIfsItem
   itemName: string,
   crtDate: Date,
   chgDate: Date,
+  mtime: number,
   size: number,
   ccsid: number,
-  itemType: '*DIR'|'*STMF'|''
+  itemType: '*DIR'|'*STMF'|'',
+  errmsg: string
 }
 
 // --------------------- ibmi_ifs_getItems -----------------------
@@ -27,7 +29,8 @@ export async function ibmi_ifs_getItems(
   {
     const libl = 'couri7 aplusb1fcc qtemp';
     const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
-    const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.size, a.ccsid, a.itemType ' +
+    const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
+      '                    a.ccsid, a.itemType, a.errmsg ' +
       'from      table(utl8022_ifsItems(?,?,?)) a ' +
       'order by  a.itemName ';
 
@@ -63,10 +66,11 @@ export async function ibmi_ifs_getItems(
       // convert create and change timestamps to javascript date fields.
       rows = rows.map((item:any) =>
       {
-        const {ITEMNAME:itemName, SIZE:size, CCSID:ccsid, ITEMTYPE:itemType } = item ;
+        const { ITEMNAME:itemName, MTIME:mtime, SIZE:size, CCSID:ccsid, 
+                ITEMTYPE:itemType, ERRMSG:errmsg } = item ;
         const chgDate = sqlTimestamp_toJavascriptDate(item.CHGTS) ;
         const crtDate = sqlTimestamp_toJavascriptDate(item.CRTTS) ;
-        return { itemName, chgDate, crtDate, size, ccsid, itemType };
+        return { itemName, chgDate, crtDate, mtime, size, ccsid, itemType, errmsg };
       });
     }
 
