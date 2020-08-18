@@ -21,14 +21,14 @@ export interface iIfsItem
 // --------------------- ibmi_ifs_getItems -----------------------
 // options:{filterItemName:string, filterItemType:string, joblog:'N'}
 export async function ibmi_ifs_getItems( 
-  dirPath: string,
+  dirPath: string, serverUrl:string,
   options?:{filterItemName?:string, filterItemType?:string, joblog?:'Y'|'N'} )
   : Promise<{rows:iIfsItem[],errmsg:string}>
 {
   const promise = new Promise<{rows:iIfsItem[],errmsg:string}>(async (resolve, reject) =>
   {
     const libl = 'couri7 aplusb1fcc qtemp';
-    const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
+    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
     const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
       '                    a.ccsid, a.itemType, a.errmsg ' +
       'from      table(utl8022_ifsItems(?,?,?)) a ' +
@@ -81,14 +81,15 @@ export async function ibmi_ifs_getItems(
 
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text
-export async function ibmi_ifs_getFileContents( filePath:string, returnType = 'buf') :
+export async function ibmi_ifs_getFileContents( filePath:string, serverUrl: string,
+                  returnType = 'buf') :
           Promise<{buf:Buffer,errmsg:string}>
 {
   let ifsFilePath = filePath ;
   const promise = new Promise<{ buf: Buffer, errmsg: string }>(async (resolve, reject) =>
   {
     const libl = 'couri7 aplusb1fcc qtemp';
-    const url = 'http://173.54.20.170:10080/coder/php/ifs-file-get-contents-base64.php';
+    const url = `${serverUrl}/coder/php/ifs-file-get-contents-base64.php`;
 
     const params =
     {
