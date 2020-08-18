@@ -27,13 +27,13 @@
   "devDependencies": {
     "@types/node": "^13.13.15",
     "prettier": "^1.19.1",
-    "sr_test_framework": "^1.0.3",
+    "sr_test_framework": "^1.0.4",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.9.7"
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "sr_core_ts": "^1.46.22"
+    "sr_core_ts": "^1.46.27"
   }
 }
