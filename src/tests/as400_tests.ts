@@ -186,7 +186,7 @@ async function test_ifs_getItems(): Promise<{ results: iTestResultItem[] }>
     let errmsg = '';
     const dirPath = '/home/srichter';
     const { rows, errmsg:errText} = await ibmi_ifs_getItems(
-      dirPath, {});
+      dirPath, serverUrl, {});
     ifsItems = rows ;
     if (errText)
       errmsg = `get items from folder ${dirPath} error ${errText}`;
@@ -228,7 +228,7 @@ async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
     let errmsg = '';
     const dirPath = '/home/srichter/.config';
     const { rows, errmsg: errText } = await ibmi_ifs_getItems(
-      dirPath, { joblog:'N'});
+      dirPath, serverUrl, { joblog:'N'});
     if (errText)
       errmsg = `get items from folder ${dirPath} error ${errText}`;
     else if (rows.length > 0)
@@ -261,7 +261,7 @@ async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }
     const filePath = '/home/srichter/abc.pdf';
     const itemName = '';
     const itemType = '';
-    const {buf, errmsg:errText } = await ibmi_ifs_getFileContents( filePath );
+    const {buf, errmsg:errText } = await ibmi_ifs_getFileContents( filePath, serverUrl );
     if ( errText )
       errmsg = `file ${filePath} read error ${errText}`;
     else if (buf.length > 0)
@@ -300,7 +300,7 @@ async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResu
     const filePath = '/home/srichter/abc xyz.pdf';  // file is not found.
     const itemName = '';
     const itemType = '';
-    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath);
+    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath, serverUrl);
     if (errText)
     {
       passText = `correctly detected file not found. file ${filePath}.`;
