@@ -337,7 +337,7 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
     // filter on member name.
     if (mbrName)
     {
-      // mbrName as generic name.
+      mbrName = mbrName.toUpperCase() ;
 
       rows = rows.filter((item: any) =>
       {
