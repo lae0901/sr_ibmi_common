@@ -317,12 +317,12 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
     const url = `${serverUrl}/coder/common/json_getManyRows.php`;
 
     const sql = 'select    a.* ' +
-      'from      table(system_dspfd_mbrlist(?,?)) a ' +
+      'from      table(system_dspfd_mbrlist(?,?,?)) a ' +
       'order by  a.mbrname ';
     const params =
     {
       libl, sql,
-      parm1: fileName, parm2: libName, debug: 'N'
+      parm1: fileName, parm2: libName, parm3:mbrName, debug: 'N'
     };
 
     const query = object_toQueryString(params);
@@ -334,24 +334,25 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
 
     let rows = await response.data;
 
-    // filter on member name.
-    if (mbrName)
-    {
-      mbrName = mbrName.toUpperCase() ;
+    // // filter on member name.
+    // if (mbrName)
+    // {
+    //   mbrName = mbrName.toUpperCase() ;
 
-      rows = rows.filter((item: any) =>
-      {
-        const item_mbrName = item.MBRNAME.trimRight();
-        if (mbrName.endsWith('*'))
-        {
-          return string_matchGeneric(item_mbrName, mbrName);
-        }
-        else
-        {
-          return (string_rtrim(item.MBRNAME).indexOf(mbrName) >= 0);
-        }
-      });
-    }
+    //   rows = rows.filter((item: any) =>
+    //   {
+    //     const item_mbrName = item.MBRNAME.trimRight();
+    //     if (mbrName.endsWith('*'))
+    //     {
+    //       return string_matchGeneric(item_mbrName, mbrName);
+    //     }
+    //     else
+    //     {
+    //       return (string_rtrim(item.MBRNAME).indexOf(mbrName) >= 0);
+    //     }
+    //   });
+    // }
+
     resolve(rows) ;
   }) ;
   return promise ;

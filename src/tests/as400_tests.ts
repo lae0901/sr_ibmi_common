@@ -1,7 +1,7 @@
 import { system_downloadsFolder, object_toQueryString, string_rtrim, 
         string_matchGeneric, file_writeNew, string_assignSubstr } from 'sr_core_ts';
 import axios from 'axios';
-import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines } from '../ibmi-common';
+import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList } from '../ibmi-common';
 import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem } from '../ibmi-ifs';
@@ -131,6 +131,22 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
       passText = `read srcmbr lines from ${mbrName}`;
     }
     testResults_append(results, passText, errmsg, method);
+  }
+
+  // as400_srcmbrList  
+  {
+    fileName = 'steveSRC' ;
+    mbrName = 'bom*' ;
+    let passText = '';
+    let errmsg = '';
+    method = 'as400_srcmbrList';
+    let aspect = 'generic member list' ;
+    const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
+    if ( mbrList.length == 4 )
+      passText = `read generic list of members ${mbrName} source file ${fileName}`;
+    else
+      errmsg = `error reading generic list of members ${mbrName} source file ${fileName}`;
+    testResults_append(results, passText, errmsg, {method, aspect});
   }
 
   return {results} ;
