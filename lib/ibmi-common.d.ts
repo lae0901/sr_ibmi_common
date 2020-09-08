@@ -10,6 +10,7 @@ export interface iDspfd_mbrlist {
     CHGTIME: string;
     MBRTEXT: string;
     SRCTYPE: string;
+    mtime: number;
 }
 interface iOptions {
     serverUrl?: string;
@@ -28,6 +29,15 @@ export interface iSrcmbrLine {
     TEXT: string;
 }
 export interface iSrcmbrXref {
+    ibmi_url?: string;
+    library: string;
+    srcFiles: string[];
+    srcTypes?: string[];
+    members?: string[];
+    mirror_hold?: boolean;
+    srcf_is_master?: boolean;
+}
+export interface iSrcfMirror {
     ibmi_url?: string;
     library: string;
     srcFiles: string[];

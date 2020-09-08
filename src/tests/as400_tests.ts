@@ -1,5 +1,5 @@
 import { system_downloadsFolder, object_toQueryString, string_rtrim, 
-        string_matchGeneric, file_writeNew, string_assignSubstr } from 'sr_core_ts';
+        string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll } from 'sr_core_ts';
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList } from '../ibmi-common';
 import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
@@ -137,16 +137,37 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   {
     fileName = 'steveSRC' ;
     mbrName = 'bom*' ;
-    let passText = '';
-    let errmsg = '';
-    method = 'as400_srcmbrList';
-    let aspect = 'generic member list' ;
     const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
-    if ( mbrList.length == 4 )
-      passText = `read generic list of members ${mbrName} source file ${fileName}`;
-    else
-      errmsg = `error reading generic list of members ${mbrName} source file ${fileName}`;
-    testResults_append(results, passText, errmsg, {method, aspect});
+    method = 'as400_srcmbrList';
+
+    {
+      const desc = `read generic list of members ${mbrName} source file ${fileName}`;
+      let aspect = 'generic member list' ;
+      const expected = 4 ;
+      const testResult = mbrList.length ;
+      testResults_append(results, {method, aspect, desc, expected, testResult }) ;
+    }
+
+    {
+      const desc = `calc member list item mtime`;
+      let aspect = 'calc mtime';
+      const member_item = mbrList[0] ;
+      const expected = 1594310689;
+      const testResult = member_item.mtime;
+      testResults_append(results, { method, aspect, desc, expected, testResult });
+    }
+
+    {
+      const desc = `member list mtime back to CHGDATE`;
+      let aspect = 'mtime to CHGDATE';
+      const member_item = mbrList[0];
+      const {mtime} = member_item;
+      const chgdate = new Date(mtime * 1000) ;
+      const chgdate_str = chgdate.toString( ) ;
+      const expected = member_item.CHGTIME;
+      const testResult = string_replaceAll(chgdate_str.substr(16,8),':','.') ;
+      testResults_append(results, { method, aspect, desc, expected, testResult });
+    }    
   }
 
   return {results} ;

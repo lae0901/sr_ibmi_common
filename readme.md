@@ -42,7 +42,7 @@ export interface iSrcmbrLine
   TEXT: string
 }
 
-export interface iSrcmbrXref
+export interface iSrcfMirror
 {
   ibmi_url?: string
   library: string;
