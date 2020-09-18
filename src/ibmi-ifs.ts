@@ -28,7 +28,7 @@ export async function ibmi_ifs_getItems(
   const promise = new Promise<{rows:iIfsItem[],errmsg:string}>(async (resolve, reject) =>
   {
     const libl = 'couri7 aplusb1fcc qtemp';
-    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
+    const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
     const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
       '                    a.ccsid, a.itemType, a.errmsg ' +
       'from      table(utl8022_ifsItems(?,?,?)) a ' +
