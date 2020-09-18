@@ -1,6 +1,7 @@
 // media/ibmi_common.ts
 
-import { object_toQueryString, string_rtrim, string_matchGeneric, string_assignSubstr } from 'sr_core_ts';
+import { date_fromISO, date_toEpoch, 
+  object_toQueryString, string_rtrim, string_matchGeneric, string_assignSubstr } from 'sr_core_ts';
 import axios from 'axios';
 import * as querystring from 'querystring';
 import {  iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents } from './ibmi-ifs';
@@ -17,7 +18,8 @@ export interface iDspfd_mbrlist
   CHGDATE: string,
   CHGTIME: string,
   MBRTEXT: string,
-  SRCTYPE: string
+  SRCTYPE: string,
+  mtime: number  // CHGDATE, CHGTIME converted to unix epoch ( seconds since 1970 )
 };
 
 // -------------------------- iOptions -------------------------
@@ -62,6 +64,24 @@ export interface iSrcmbrXref
   // removed if they do not exist as srcmbr in source file.
   srcf_is_master?: boolean;
 }
+
+// ---------------------------------- iSrcfMirror ---------------------------------
+// structure of .srcf-mirror.json file.
+export interface iSrcfMirror
+{
+  ibmi_url?: string
+  library: string;
+  srcFiles: string[];
+  srcTypes?: string[];
+  members?: string[];
+
+  mirror_hold?: boolean;
+
+  // source file is the master. Files in the srcmbr folder are
+  // removed if they do not exist as srcmbr in source file.
+  srcf_is_master?: boolean;
+}
+
 
 // --------------------- as400_addpfm -----------------------
 export async function as400_addpfm(
@@ -317,12 +337,12 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
     const url = `${serverUrl}/coder/common/json_getManyRows.php`;
 
     const sql = 'select    a.* ' +
-      'from      table(system_dspfd_mbrlist(?,?)) a ' +
+      'from      table(system_dspfd_mbrlist(?,?,?)) a ' +
       'order by  a.mbrname ';
     const params =
     {
       libl, sql,
-      parm1: fileName, parm2: libName, debug: 'N'
+      parm1: fileName, parm2: libName, parm3:mbrName, debug: 'N'
     };
 
     const query = object_toQueryString(params);
@@ -332,26 +352,17 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
       method: 'get', url: url_query, responseType: 'json'
     });
 
-    let rows = await response.data;
+    let rows = await response.data as iDspfd_mbrlist[];
 
-    // filter on member name.
-    if (mbrName)
+    // calc mtime and add to the member info object.
+    rows = rows.map((item) =>
     {
-      mbrName = mbrName.toUpperCase() ;
+      const { CHGDATE, CHGTIME } = item ;
+      const dt = date_fromISO(CHGDATE, CHGTIME) ;
+      const mtime = date_toEpoch(dt) ;
+      return {...item, mtime } ;
+    });
 
-      rows = rows.filter((item: any) =>
-      {
-        const item_mbrName = item.MBRNAME.trimRight();
-        if (mbrName.endsWith('*'))
-        {
-          return string_matchGeneric(item_mbrName, mbrName);
-        }
-        else
-        {
-          return (string_rtrim(item.MBRNAME).indexOf(mbrName) >= 0);
-        }
-      });
-    }
     resolve(rows) ;
   }) ;
   return promise ;
