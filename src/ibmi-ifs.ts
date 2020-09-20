@@ -22,13 +22,13 @@ export interface iIfsItem
 // options:{filterItemName:string, filterItemType:string, joblog:'N'}
 export async function ibmi_ifs_getItems( 
   dirPath: string, serverUrl:string,
-  options?:{filterItemName?:string, filterItemType?:string, joblog?:'Y'|'N'} )
+  options?:{filterItemName?:string, filterItemType?:string, joblog?:'Y'|'N', debug?:'Y'|'N'} )
   : Promise<{rows:iIfsItem[],errmsg:string}>
 {
   const promise = new Promise<{rows:iIfsItem[],errmsg:string}>(async (resolve, reject) =>
   {
     const libl = 'couri7 aplusb1fcc qtemp';
-    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
+    const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
     const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
       '                    a.ccsid, a.itemType, a.errmsg ' +
       'from      table(utl8022_ifsItems(?,?,?)) a ' +
@@ -38,12 +38,13 @@ export async function ibmi_ifs_getItems(
     const filterItemName = options.filterItemName || '' ;
     const filterItemType = options.filterItemType || '' ;
     const joblog = options.joblog || 'N' ;
+    const debug = options.debug || 'N' ;
 
     const params =
     {
       libl, sql,
       parm1: dirPath, parm2: filterItemName, parm3: filterItemType, 
-      debug: 'N', joblog
+      debug, joblog
     };
 
     const query = object_toQueryString(params);
