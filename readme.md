@@ -2,6 +2,7 @@
 
 ## source file functions
 * const { errmsg } = await as400_addpfm( fileName, libName, mbrName, textDesc, srcType, options );
+* const { errmsg } = await as400_chgpfm( fileName, libName, mbrName, textDesc, srcType )
 * as400_srcfList(objName: string, libName: string) : Promise<{}[]>
 * as400_compile( srcfName:string, srcfLib:string, srcmbr:string, iOptions) :
       Promise<{compMsg:string, compile:iCompileLine[], joblog:string[]}>
@@ -15,12 +16,12 @@
 
 ## interfaces
 ```
-// -------------------------- iOptions -------------------------
+// -------------------------- iServerOptions -------------------------
 // options passed to server REST API.
 // serverUrl: url of the server.  http://192.168.1.170:10080
 // numRows: max number of rows to return
 // libl: library list when api runs on server
-interface iOptions
+interface iServerOptions
 {
   serverUrl?: string,
   numRows?: number,

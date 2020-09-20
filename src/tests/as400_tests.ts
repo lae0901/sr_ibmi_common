@@ -1,7 +1,7 @@
 import { system_downloadsFolder, object_toQueryString, string_rtrim, 
         string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll } from 'sr_core_ts';
 import axios from 'axios';
-import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList } from '../ibmi-common';
+import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions } from '../ibmi-common';
 import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem } from '../ibmi-ifs';
@@ -72,7 +72,7 @@ async function as400_member_test(): Promise<{ results: iTestResultItem[] }>
   const libl = 'COURI7 APLUSB1FCC QTEMP' ;
   const serverUrl = 'http://173.54.20.170:10080' ;
 
-  const options = { libl, serverUrl } ;
+  const options :iServerOptions = { libl, serverUrl, joblog:'N' } ;
 
   // addpfm 
   {
@@ -108,35 +108,29 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   const results = testResults_new();
 
   let method = '';
-  let fileName = 'QRPGLESRC';
+  let fileName = 'STEVESRC';
   let libName = 'COURI7';
-  let mbrName = 'ACOM0011R';
+  let mbrName = 'BATLABR';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
   const serverUrl = 'http://173.54.20.170:10080';
 
-  const options = { libl, serverUrl };
+  const options : iServerOptions = { libl, serverUrl };
 
   // as400_srcmbrLines 
   {
-    let passText = '';
-    let errmsg = '' ;
     method = 'as400_srcmbrLines';
+    const desc = `read srcmbr lines from ${mbrName}`;
+    const expected = 235;
     const lines = await as400_srcmbrLines( libName, fileName, mbrName);
-    if ( typeof lines == 'string')
-    {
-      errmsg = `error reading srcmbr lines from ${mbrName}`;
-    }
-    else
-    {
-      passText = `read srcmbr lines from ${mbrName}`;
-    }
-    testResults_append(results, passText, errmsg, method);
+    const testResult = typeof lines == 'string' ? lines : lines.length ;
+
+    testResults_append(results, { desc, method, expected, testResult });
   }
 
   // as400_srcmbrList  
   {
-    fileName = 'steveSRC' ;
-    mbrName = 'bom*' ;
+    let fileName = 'steveSRC' ;
+    let mbrName = 'bom*' ;
     const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
     method = 'as400_srcmbrList';
 
@@ -152,7 +146,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
       const desc = `calc member list item mtime`;
       let aspect = 'calc mtime';
       const member_item = mbrList[0] ;
-      const expected = 1594310689;
+      const expected = 1599764720;
       const testResult = member_item.mtime;
       testResults_append(results, { method, aspect, desc, expected, testResult });
     }
@@ -168,6 +162,56 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
       const testResult = string_replaceAll(chgdate_str.substr(16,8),':','.') ;
       testResults_append(results, { method, aspect, desc, expected, testResult });
     }    
+  }
+
+  // get srctype and text desc of srcmbr.
+  let orig_srcType = '' ;
+  let orig_mbrText = '' ;
+  {
+    const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
+    orig_srcType = mbrList[0].SRCTYPE;
+    orig_mbrText = mbrList[0].MBRTEXT;
+  }
+
+  // change source type and member text desc
+  const chg_mbrText = 'update text desc';
+  const chg_srcType = 'CLLE';
+  {
+    method = 'as400_chgpfm';
+    const desc = `change srctype and text description of ${mbrName}`;
+    const expected = 'successful';
+    const {errmsg} = await as400_chgpfm(fileName, libName, mbrName, chg_mbrText, chg_srcType, options);
+    const testResult = errmsg ? errmsg : 'successful';
+    testResults_append(results, { desc, method, expected, testResult });
+  }
+
+  // get srctype and text desc of srcmbr after change.
+  let cur_srcType = '';
+  let cur_mbrText = '';
+  {
+    const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
+    cur_srcType = mbrList[0].SRCTYPE;
+    cur_mbrText = mbrList[0].MBRTEXT;
+  }
+
+  // check that srctype and mbrText changed correctly.
+  {
+    method = 'as400_chgpfm';
+    const aspect = 'check srctype' ;
+    const expected = chg_srcType + chg_mbrText;
+    const testResult = cur_srcType + cur_mbrText ;
+    testResults_append(results, { aspect, method, expected, testResult });
+  }
+
+  // change source type and member text desc back to original values.
+  {
+    method = 'as400_chgpfm';
+    const aspect = 'restore srctype' ;
+    const desc = 'change srctype and mbrText back to original values' ;
+    const expected = orig_srcType + orig_mbrText;
+    const { errmsg } = await as400_chgpfm(fileName, libName, mbrName, orig_mbrText, orig_srcType, options);
+    const testResult = errmsg ? errmsg : orig_srcType + orig_mbrText;
+    testResults_append(results, { desc, method, expected, testResult });
   }
 
   return {results} ;

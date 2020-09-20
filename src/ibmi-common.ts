@@ -22,17 +22,18 @@ export interface iDspfd_mbrlist
   mtime: number  // CHGDATE, CHGTIME converted to unix epoch ( seconds since 1970 )
 };
 
-// -------------------------- iOptions -------------------------
+// -------------------------- iServerOptions -------------------------
 // options passed to server REST API.
 // serverUrl: url of the server.  http://192.168.1.170:10080
 // numRows: max number of rows to return
 // libl: library list when api runs on server
-interface iOptions
+export interface iServerOptions
 {
   serverUrl?: string,
   numRows?: number,
   libl?: string,
-  curlib?: string
+  curlib?: string,
+  joblog?: 'Y' | 'N'
 }
 
 export interface iCompileLine
@@ -82,11 +83,10 @@ export interface iSrcfMirror
   srcf_is_master?: boolean;
 }
 
-
 // --------------------- as400_addpfm -----------------------
 export async function as400_addpfm(
   fileName: string, libName: string, mbrName: string, 
-  textDesc: string, srcType: string, options: iOptions):
+  textDesc: string, srcType: string, options: iServerOptions):
   Promise<{ errmsg: string }>
 {
   const promise = new Promise<{ errmsg: string }>
@@ -122,10 +122,50 @@ export async function as400_addpfm(
   return promise;
 }
 
+// --------------------- as400_chgpfm -----------------------
+export async function as400_chgpfm(
+  fileName: string, libName: string, mbrName: string,
+  textDesc: string, srcType: string, options: iServerOptions):
+  Promise<{ errmsg: string }>
+{
+  const promise = new Promise<{ errmsg: string }>
+    (async (resolve, reject) =>
+    {
+      fileName = fileName || '';
+      libName = libName || '';
+      mbrName = mbrName || '';
+      const libl = options.libl || 'QGPL QTEMP';
+      const curlib = options.curlib || '';
+      const serverUrl = options.serverUrl || '';
+      const joblog = options.joblog || 'N' ;
+      let errmsg = '';
+
+      const url = `${serverUrl}/coder/common/json_runSqlReturnEmpty.php`;
+      const params =
+      {
+        libl, proc: 'system_chgpfm', joblog,
+        outParm1: errmsg, parm2: fileName,
+        parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
+      }
+      const query = object_toQueryString(params);
+      const url_query = url + '?' + query;
+
+      const response = await axios({
+        method: 'get', url: url_query, responseType: 'json'
+      });
+
+      let data = await response.data;
+      errmsg = data.outParm1.trim();
+      resolve({ errmsg });
+    });
+
+  return promise;
+}
+
 // --------------------- as400_compile -----------------------
 export async function as400_compile( 
       srcfName:string, srcfLib:string, 
-      srcmbr:string, options:iOptions ) :
+      srcmbr:string, options:iServerOptions ) :
       Promise<{compMsg:string, compile:iCompileLine[], joblog:string[]}>
 {
   const promise = new Promise<{ compMsg: string, compile: iCompileLine[], joblog: string[] }> 
@@ -168,7 +208,7 @@ export async function as400_compile(
 
 // --------------------- as400_rmvm -----------------------
 export async function as400_rmvm(
-  fileName: string, libName: string, mbrName: string, options: iOptions):
+  fileName: string, libName: string, mbrName: string, options: iServerOptions):
   Promise<{ errmsg: string }>
 {
   const promise = new Promise<{ errmsg: string }>
@@ -205,7 +245,7 @@ export async function as400_rmvm(
 }
 
 // --------------------- as400_srcfList -----------------------
-export function as400_srcfList(objName: string, libName: string, options?: iOptions) : Promise<{}[]>
+export function as400_srcfList(objName: string, libName: string, options?: iServerOptions) : Promise<{}[]>
 {
   const promise = new Promise<{}[]> (async (resolve, reject) =>
   {
@@ -326,7 +366,7 @@ function respText_extractErrorText(respText:string)
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.
 export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string = '', 
-        options?: iOptions )
+        options?: iServerOptions )
   : Promise<iDspfd_mbrlist[]>
 {
   const promise = new Promise< iDspfd_mbrlist[]>(async (resolve, reject) =>
