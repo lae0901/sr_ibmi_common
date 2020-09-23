@@ -146,7 +146,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
       const desc = `calc member list item mtime`;
       let aspect = 'calc mtime';
       const member_item = mbrList[0] ;
-      const expected = 1599764720;
+      const expected = 1600706364;
       const testResult = member_item.mtime;
       testResults_append(results, { method, aspect, desc, expected, testResult });
     }

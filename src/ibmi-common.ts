@@ -196,8 +196,7 @@ export async function as400_compile(
     });
 
     let data = await response.data;
-    let outSet = data.outSet;
-    compMsg = outSet.outParm1;
+    compMsg = data.outParm1;
     compile = data.set1 || [] ;
     joblog  = data.set2 || [] ;
     resolve( { compMsg, compile, joblog });
@@ -266,7 +265,7 @@ export function as400_srcfList(objName: string, libName: string, options?: iServ
     const respText = await response.data;
     const rows = JSON.parse(respText);
 
-    resolve(rows);
+    resolve(rows.set1);
   });
 
   return promise;
@@ -292,7 +291,7 @@ export function as400_routines(libName: string, routineName: string): Promise<{}
     const respText = await response.data;
     const rows = JSON.parse(respText);
 
-    resolve(rows);
+    resolve(rows.set1);
   });
 
   return promise;
@@ -332,7 +331,7 @@ export async function as400_srcmbrLines(libName: string, fileName: string, mbrNa
     // const ch1 = '1' ;
   }
 
-  resolve(rows);
+  resolve(rows.set1);
 }) ;
 return promise ;
 }
@@ -392,7 +391,8 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
       method: 'get', url: url_query, responseType: 'json'
     });
 
-    let rows = await response.data as iDspfd_mbrlist[];
+    let data = await response.data;
+    let rows = data.set1 as iDspfd_mbrlist[];
 
     // calc mtime and add to the member info object.
     rows = rows.map((item) =>
@@ -431,7 +431,7 @@ export async function as400_tablesAndViews_select(schema: string, collName: stri
 
   const rows = await response.data;
 
-  return rows;
+  return rows.set1;
 }
 
 // ------------------------- sqlTimestamp_toJavascriptDate -------------------------
