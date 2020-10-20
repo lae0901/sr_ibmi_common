@@ -9,6 +9,7 @@
 * const { errmsg } = await as400_rmvm( fileName, libName, mbrName, options )
 * iSrcmbrLine[] = await as400_srcmbrLines( lib, file, srcmbr )
 * iDspfd_mbrlist[] = await as400_srcmbrList( lib, file, srcmbr )
+* iDspffd[] = await as400_dspffd( lib, file, iServerOptions )
 
 ## ibm i ifs functions
 * iIfsItem[] = await ibmi_ifs_getItems( dirPath, itemName, filter_itemType )

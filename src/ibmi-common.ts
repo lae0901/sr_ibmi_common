@@ -22,6 +22,32 @@ export interface iDspfd_mbrlist
   mtime: number  // CHGDATE, CHGTIME converted to unix epoch ( seconds since 1970 )
 };
 
+// ------------------------------------ iDspffd ------------------------------------
+export interface iDspffd
+{
+  WHFILE: string;
+  WHLIB: string;
+  WHFTYP: string;
+  WHCNT: number;
+  WHNAME: string;
+  WHSEQ: string;
+  WHTEXT: string;
+  WHFLDN: number;
+  WHRLEN: number;
+  FLDNAME: string;
+  WHFOBO: number;
+  WHIBO: number;
+  WHFLDB: number;
+  WHFLDD: number;
+  WHFLDP: number;
+  WHFTXT: string;
+  WHCHD1: string;
+  WHCHD2: string;
+  WHCHD3: string;
+  WHFLDT: string;
+  WHFIOB: string;
+};
+
 // -------------------------- iServerOptions -------------------------
 // options passed to server REST API.
 // serverUrl: url of the server.  http://192.168.1.170:10080
@@ -202,6 +228,41 @@ export async function as400_compile(
     resolve( { compMsg, compile, joblog });
   });
 
+  return promise;
+}
+// --------------------- as400_dspffd -----------------------
+// return array of srcmbrs of a srcfile.
+export async function as400_dspffd(libName: string, fileName: string,
+  options?: iServerOptions)
+  : Promise<iDspffd[]>
+{
+  const promise = new Promise<iDspffd[]>(async (resolve, reject) =>
+  {
+    options = options || {};
+    const serverUrl = options.serverUrl || 'http://173.54.20.170:10080';
+    const libl = options.libl || 'couri7 aplusb1fcc qtemp';
+    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
+
+    const sql = 'select    a.* ' +
+      'from      table(system_dspffd(?,?)) a ' ;
+    const params =
+    {
+      libl, sql,
+      parm1: libName, parm2: fileName, debug: 'N'
+    };
+
+    const query = object_toQueryString(params);
+    const url_query = url + '?' + query;
+
+    const response = await axios({
+      method: 'get', url: url_query, responseType: 'json'
+    });
+
+    let data = await response.data;
+    let rows = data.set1 as iDspffd[];
+
+    resolve(rows);
+  });
   return promise;
 }
 

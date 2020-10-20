@@ -1,7 +1,7 @@
 import { system_downloadsFolder, object_toQueryString, string_rtrim, 
         string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll } from 'sr_core_ts';
 import axios from 'axios';
-import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions } from '../ibmi-common';
+import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd } from '../ibmi-common';
 import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem } from '../ibmi-ifs';
@@ -32,6 +32,12 @@ async function async_main()
   // IFS tests
   {
     const {results:res} = await ifs_ibmi_test();
+    results.push(...res);
+  }
+
+  // dspffd tests
+  {
+    const { results: res } = await as400_dspffd_test();
     results.push(...res);
   }
 
@@ -146,7 +152,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
       const desc = `calc member list item mtime`;
       let aspect = 'calc mtime';
       const member_item = mbrList[0] ;
-      const expected = 1600706364;
+      const expected = 1601921828;
       const testResult = member_item.mtime;
       testResults_append(results, { method, aspect, desc, expected, testResult });
     }
@@ -395,4 +401,32 @@ async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResu
   }
 
   return { results }
+}
+
+// ---------------------------------- as400_dspffd_test ----------------------------------
+// add and remove member from file.
+async function as400_dspffd_test(): Promise<{ results: iTestResultItem[] }>
+{
+  const results = testResults_new();
+
+  let method = '';
+  let fileName = 'ITMST';
+  let libName = 'APLUSB1FCC';
+  const libl = 'COURI7 APLUSB1FCC QTEMP';
+  const serverUrl = 'http://173.54.20.170:10080';
+
+  const options: iServerOptions = { libl, serverUrl };
+
+  // as400_dspffd 
+  {
+    method = 'as400_dspffd';
+    const desc = `read fields from ${fileName}`;
+    const expected = 94;
+    const flds = await as400_dspffd(libName, fileName, options);
+    const actual = flds.length ;
+
+    testResults_append(results, { desc, method, expected, actual });
+  }
+
+  return { results };
 }

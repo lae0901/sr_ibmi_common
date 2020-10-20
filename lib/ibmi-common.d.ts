@@ -12,6 +12,29 @@ export interface iDspfd_mbrlist {
     SRCTYPE: string;
     mtime: number;
 }
+export interface iDspffd {
+    WHFILE: string;
+    WHLIB: string;
+    WHFTYP: string;
+    WHCNT: number;
+    WHNAME: string;
+    WHSEQ: string;
+    WHTEXT: string;
+    WHFLDN: number;
+    WHRLEN: number;
+    FLDNAME: string;
+    WHFOBO: number;
+    WHIBO: number;
+    WHFLDB: number;
+    WHFLDD: number;
+    WHFLDP: number;
+    WHFTXT: string;
+    WHCHD1: string;
+    WHCHD2: string;
+    WHCHD3: string;
+    WHFLDT: string;
+    WHFIOB: string;
+}
 export interface iServerOptions {
     serverUrl?: string;
     numRows?: number;
@@ -58,6 +81,7 @@ export declare function as400_compile(srcfName: string, srcfLib: string, srcmbr:
     compile: iCompileLine[];
     joblog: string[];
 }>;
+export declare function as400_dspffd(libName: string, fileName: string, options?: iServerOptions): Promise<iDspffd[]>;
 export declare function as400_rmvm(fileName: string, libName: string, mbrName: string, options: iServerOptions): Promise<{
     errmsg: string;
 }>;
