@@ -423,7 +423,7 @@ async function as400_dspffd_test(): Promise<{ results: iTestResultItem[] }>
     const desc = `read fields from ${fileName}`;
     const expected = 94;
     const flds = await as400_dspffd(libName, fileName, options);
-    const actual = flds.length ;
+    const actual = flds ? flds.length : 0 ;
 
     testResults_append(results, { desc, method, expected, actual });
   }

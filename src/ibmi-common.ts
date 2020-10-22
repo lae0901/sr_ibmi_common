@@ -234,9 +234,9 @@ export async function as400_compile(
 // return array of srcmbrs of a srcfile.
 export async function as400_dspffd(libName: string, fileName: string,
   options?: iServerOptions)
-  : Promise<iDspffd[]>
+  : Promise<iDspffd[] | undefined>
 {
-  const promise = new Promise<iDspffd[]>(async (resolve, reject) =>
+  const promise = new Promise<iDspffd[] | undefined>(async (resolve, reject) =>
   {
     options = options || {};
     const serverUrl = options.serverUrl || 'http://173.54.20.170:10080';
@@ -259,7 +259,9 @@ export async function as400_dspffd(libName: string, fileName: string,
     });
 
     let data = await response.data;
-    let rows = data.set1 as iDspffd[];
+    let rows = data.set1 as iDspffd[] | undefined;
+    if ( rows && rows.length == 0 )
+      rows = undefined ;
 
     resolve(rows);
   });
@@ -420,8 +422,6 @@ function respText_extractErrorText(respText:string)
   }
   return { jsonText, errText };
 }
-
-
 
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.

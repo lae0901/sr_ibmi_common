@@ -81,7 +81,7 @@ export declare function as400_compile(srcfName: string, srcfLib: string, srcmbr:
     compile: iCompileLine[];
     joblog: string[];
 }>;
-export declare function as400_dspffd(libName: string, fileName: string, options?: iServerOptions): Promise<iDspffd[]>;
+export declare function as400_dspffd(libName: string, fileName: string, options?: iServerOptions): Promise<iDspffd[] | undefined>;
 export declare function as400_rmvm(fileName: string, libName: string, mbrName: string, options: iServerOptions): Promise<{
     errmsg: string;
 }>;
