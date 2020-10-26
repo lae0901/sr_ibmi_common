@@ -35,8 +35,8 @@ export interface iDspffd
   WHFLDN: number;
   WHRLEN: number;
   FLDNAME: string;
-  WHFOBO: number;
-  WHIBO: number;
+  DATADEFN: string;
+  WHFLDT: string;
   WHFLDB: number;
   WHFLDD: number;
   WHFLDP: number;
@@ -44,7 +44,8 @@ export interface iDspffd
   WHCHD1: string;
   WHCHD2: string;
   WHCHD3: string;
-  WHFLDT: string;
+  WHFOBO: number;
+  WHIBO: number;
   WHFIOB: string;
 };
 
