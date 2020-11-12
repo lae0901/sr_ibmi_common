@@ -127,7 +127,7 @@ export async function ibmi_ifs_getFileContents( filePath:string, serverUrl: stri
  * @param serverUrl server url
  * @param ifsFilePath path of file on IFS to delete
  */
-export async function ibmi_ifs_unlink( serverUrl:string, ifsFilePath:string )
+export async function ibmi_ifs_unlink(ifsFilePath: string, serverUrl: string )
 {
   const params = {ifsFilePath} ;
   const query = object_toQueryString(params);
@@ -137,6 +137,7 @@ export async function ibmi_ifs_unlink( serverUrl:string, ifsFilePath:string )
   const response = await fetch(url,
   {
     method: 'POST',
+    
     // headers: { 'Content-Type': 'application/json' },
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: query

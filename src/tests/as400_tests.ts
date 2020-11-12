@@ -3,7 +3,7 @@ import { system_downloadsFolder, object_toQueryString, string_rtrim,
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
-import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem } from '../ibmi-ifs';
+import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink } from '../ibmi-ifs';
 import path = require('path');
 import * as fs from 'fs' ;
 
@@ -252,6 +252,12 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
     results.push(...res);
   }
 
+  // ibmi_ifs_unlink
+  {
+    const { results: res } = await test_ifs_unlink( ) ;
+    results.push(...res);
+  }
+
   return { results }
 }
 
@@ -413,23 +419,11 @@ async function test_ifs_unlink()
 
   // ibmi_ifs_unlink
   {
-    method = 'ibmi_ifs_getFileContents';
-    let passText = '';
-    let errmsg = '';
-    const filePath = '/home/srichter/abc xyz.pdf';  // file is not found.
-    const itemName = '';
-    const itemType = '';
-    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath, serverUrl);
-    if (errText)
-    {
-      passText = `correctly detected file not found. file ${filePath}.`;
-    }
-    else
-    {
-      errmsg = `did not detect file not found error. File ${filePath}`;
-    }
-
-    testResults_append(results, passText, errmsg, method);
+    method = 'ibmi_ifs_unlink';
+    const ifsFilePath = '/www/zendphp7/htdocs/autocoder/tester/steve.txt';
+    const actual = await ibmi_ifs_unlink(ifsFilePath, serverUrl);
+    const expected = '' ;
+    testResults_append(results, {method, actual, expected });
   }
 
   return { results }
