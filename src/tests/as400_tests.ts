@@ -422,7 +422,7 @@ async function test_ifs_unlink()
     method = 'ibmi_ifs_unlink';
     const ifsFilePath = '/www/zendphp7/htdocs/autocoder/tester/steve.txt';
     const actual = await ibmi_ifs_unlink(ifsFilePath, serverUrl);
-    const expected = '' ;
+    const expected = 'file /www/zendphp7/htdocs/autocoder/tester/steve.txt deleted\n' ;
     testResults_append(results, {method, actual, expected });
   }
 

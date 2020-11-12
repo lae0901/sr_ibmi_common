@@ -4,6 +4,8 @@ import { object_toQueryString, string_rtrim, string_matchGeneric, string_assignS
 import axios from 'axios';
 import * as querystring from 'querystring';
 import { sqlTimestamp_toJavascriptDate } from './ibmi-common';
+import * as FormData from 'form-data';
+import { form_getLength } from './common/common_core';
 
 // ----------------------------------- iIfsItem -----------------------------------
 export interface iIfsItem
@@ -132,17 +134,20 @@ export async function ibmi_ifs_unlink(ifsFilePath: string, serverUrl: string )
   const params = {ifsFilePath} ;
   const query = object_toQueryString(params);
   const libl = 'couri7 aplusb1fcc qtemp';
-  const url = `${serverUrl}/coder/php/php-file-unlink.php`;
+  const url = `${serverUrl}/site/common/delete-ifs.php`;
+  let message = '' ;
 
-  const response = await fetch(url,
+  // post to delete-ifs.php on ibm i server to delete the file.
+  const form = new FormData();
+  form.append('filePath', ifsFilePath);
+
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
   {
-    method: 'POST',
-    
-    // headers: { 'Content-Type': 'application/json' },
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: query
-  });
+    const result = await axios.post( url, form,
+      { headers });
+    message = result.data ;
+  }
 
-  const respText = await response.text();
-  return respText ;
+  return message ;
 }

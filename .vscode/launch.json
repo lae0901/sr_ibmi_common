@@ -12,7 +12,8 @@
       "program": "${workspaceFolder}\\src\\tests\\as400_tests.ts",
       "outFiles": [
         "${workspaceFolder}/lib/**/*.js"
-      ]
+      ],
+      "preLaunchTask": "npm: build"
     },
     
     {
