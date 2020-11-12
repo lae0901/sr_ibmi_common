@@ -120,3 +120,28 @@ export async function ibmi_ifs_getFileContents( filePath:string, serverUrl: stri
   });
   return promise;
 }
+
+// -------------------------------- ibmi_ifs_unlink --------------------------------
+/**
+ * delete file from directory on IFS
+ * @param serverUrl server url
+ * @param ifsFilePath path of file on IFS to delete
+ */
+export async function ibmi_ifs_unlink( serverUrl:string, ifsFilePath:string )
+{
+  const params = {ifsFilePath} ;
+  const query = object_toQueryString(params);
+  const libl = 'couri7 aplusb1fcc qtemp';
+  const url = `${serverUrl}/coder/php/php-file-unlink.php`;
+
+  const response = await fetch(url,
+  {
+    method: 'POST',
+    // headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: query
+  });
+
+  const respText = await response.text();
+  return respText ;
+}

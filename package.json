@@ -23,12 +23,12 @@
   },
   "homepage": "https://github.com/lae0901/sr_ibmi_common#readme",
   "devDependencies": {
-    "@types/node": "^13.13.26",
-    "sr_test_framework": "^1.0.15",
+    "@types/node": "^13.13.30",
+    "sr_test_framework": "^1.0.17",
     "typescript": "^3.9.7"
   },
   "dependencies": {
     "axios": "^0.19.2",
-    "sr_core_ts": "^1.46.41"
+    "sr_core_ts": "^1.46.43"
   }
 }

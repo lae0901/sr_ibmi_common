@@ -2,7 +2,6 @@ import { system_downloadsFolder, object_toQueryString, string_rtrim,
         string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll } from 'sr_core_ts';
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd } from '../ibmi-common';
-import { iTesterResults, testerResults_append, testerResults_consoleLog, testerResults_new } from '../tester-core';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem } from '../ibmi-ifs';
 import path = require('path');
@@ -380,6 +379,39 @@ async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResu
   const serverUrl = 'http://173.54.20.170:10080';
 
   // ibmi_ifs_getFileContents
+  {
+    method = 'ibmi_ifs_getFileContents';
+    let passText = '';
+    let errmsg = '';
+    const filePath = '/home/srichter/abc xyz.pdf';  // file is not found.
+    const itemName = '';
+    const itemType = '';
+    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath, serverUrl);
+    if (errText)
+    {
+      passText = `correctly detected file not found. file ${filePath}.`;
+    }
+    else
+    {
+      errmsg = `did not detect file not found error. File ${filePath}`;
+    }
+
+    testResults_append(results, passText, errmsg, method);
+  }
+
+  return { results }
+}
+
+// ------------------------------ test_ifs_unlink --------------------
+// add and remove member from file.
+async function test_ifs_unlink() 
+{
+  const results = testResults_new();
+  let method = '';
+  const libl = 'COURI7 APLUSB1FCC QTEMP';
+  const serverUrl = 'http://173.54.20.170:10080';
+
+  // ibmi_ifs_unlink
   {
     method = 'ibmi_ifs_getFileContents';
     let passText = '';
