@@ -5,7 +5,7 @@ import axios from 'axios';
 import * as querystring from 'querystring';
 import { sqlTimestamp_toJavascriptDate } from './ibmi-common';
 import * as FormData from 'form-data';
-import { form_getLength } from './common/common_core';
+import { form_getLength } from './common_core';
 
 // ----------------------------------- iIfsItem -----------------------------------
 export interface iIfsItem
