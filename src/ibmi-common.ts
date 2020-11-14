@@ -4,10 +4,12 @@ import { date_fromISO, date_toEpoch,
   object_toQueryString, string_rtrim, string_matchGeneric, string_assignSubstr } from 'sr_core_ts';
 import axios from 'axios';
 import * as querystring from 'querystring';
-import {  iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink } from './ibmi-ifs';
+import {  iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink,
+          ibmi_ifs_deleteDir, ibmi_ifs_ensureDir, ibmi_ifs_checkDir } from './ibmi-ifs';
 import { form_getLength } from './common_core';
 
-export { iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink} ;
+export { iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink, 
+        ibmi_ifs_deleteDir, ibmi_ifs_ensureDir, ibmi_ifs_checkDir } ;
 export { form_getLength } ;
 
 export interface iDspfd_mbrlist

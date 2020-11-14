@@ -15,6 +15,9 @@
 * iIfsItem[] = await ibmi_ifs_getItems( dirPath, itemName, filter_itemType )
 * {buf,errmsg} = await ibmi_ifs_getFileContents( filePath )
 * message = await ibmi_ifs_unlink( ifsFilePath, serverUrl )
+* await ibmi_ifs_deleteDir( ifsDirPath, serverUrl )
+* await ibmi_ifs_ensureDir( ifsDirPath, serverUrl )
+* await ibmi_ifs_checkDir( ifsDirPath, serverUrl )
 
 ## interfaces
 ```

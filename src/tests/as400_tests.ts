@@ -3,7 +3,7 @@ import { system_downloadsFolder, object_toQueryString, string_rtrim,
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
-import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink } from '../ibmi-ifs';
+import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir } from '../ibmi-ifs';
 import path = require('path');
 import * as fs from 'fs' ;
 
@@ -258,6 +258,12 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
     results.push(...res);
   }
 
+  // test ifs directory functions.
+  {
+    const { results: res } = await test_ifs_dir();
+    results.push(...res);
+  }
+
   return { results }
 }
 
@@ -403,6 +409,45 @@ async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResu
     }
 
     testResults_append(results, passText, errmsg, method);
+  }
+
+  return { results }
+}
+
+// ------------------------------ test_ifs_dir --------------------
+// add and remove member from file.
+async function test_ifs_dir() 
+{
+  const results = testResults_new();
+  let method = '';
+  const libl = 'COURI7 APLUSB1FCC QTEMP';
+  const serverUrl = 'http://173.54.20.170:10080';
+
+  // make sure directory exists.       
+  {
+    method = 'ibmi_ifs_ensureDir';
+    const ifsDirPath = '/home/srichter/folder2/steve';
+    const actual = await ibmi_ifs_ensureDir(ifsDirPath, serverUrl);
+    const expected = '';
+    testResults_append(results, { method, actual, expected });
+  }
+
+  // check that directory exists.       
+  {
+    method = 'ibmi_ifs_checkDir';
+    const ifsDirPath = '/home/srichter/folder2/steve';
+    const actual = await ibmi_ifs_checkDir(ifsDirPath, serverUrl);
+    const expected = 'exists\n';
+    testResults_append(results, { method, actual, expected });
+  }
+
+  // delete directory.       
+  {
+    method = 'ibmi_ifs_deleteDir';
+    const ifsDirPath = '/home/srichter/folder2/steve';
+    const actual = await ibmi_ifs_deleteDir(ifsDirPath, serverUrl);
+    const expected = '';
+    testResults_append(results, { method, actual, expected });
   }
 
   return { results }

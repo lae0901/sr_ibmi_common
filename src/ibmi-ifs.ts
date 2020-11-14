@@ -151,3 +151,95 @@ export async function ibmi_ifs_unlink(ifsFilePath: string, serverUrl: string )
 
   return message ;
 }
+
+// -------------------------------- ibmi_ifs_deleteDir --------------------------------
+/**
+ * delete IBM i IFS directory.
+ * @param serverUrl server url
+ * @param ifsDirPath path of IFS directory to delete
+ */
+export async function ibmi_ifs_deleteDir(ifsDirPath: string, serverUrl: string)
+{
+  const libl = 'couri7 aplusb1fcc qtemp';
+  const url = `${serverUrl}/site/common/ifs-action.php`;
+  let message = '';
+  const action = 'deleteDir' ;
+
+  // post to delete-ifs-dir.php on ibm i server to delete the directory.
+  const form = new FormData();
+  form.append('dirPath', ifsDirPath);
+  form.append('action', action);
+
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
+  {
+    const result = await axios.post(url, form,
+      { headers });
+    message = result.data;
+  }
+
+  return message;
+}
+
+// -------------------------------- ibmi_ifs_ensureDir --------------------------------
+/**
+ * ensure directory exists in IBM I IFS. 
+ * @param serverUrl server url
+ * @param ifsDirPath path of IFS directory to ensure exists
+ */
+export async function ibmi_ifs_ensureDir(ifsDirPath: string, serverUrl: string)
+{
+  // const params = { ifsDirPath };
+  // const query = object_toQueryString(params);
+  const libl = 'couri7 aplusb1fcc qtemp';
+  const url = `${serverUrl}/site/common/ifs-action.php`;
+  let message = '';
+  const action = 'ensureDir';
+
+  // post to ensure-ifs-dir.php on ibm i server to make sure directory exists.
+  const form = new FormData();
+  form.append('action', action );
+  form.append('dirPath', ifsDirPath);
+
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
+  {
+    const result = await axios.post(url, form,
+      { headers });
+    message = result.data;
+  }
+
+  return message;
+}
+
+// -------------------------------- ibmi_ifs_checkDir --------------------------------
+/**
+ * check that directory exists in IBM I IFS. 
+ * @param serverUrl server url
+ * @param ifsDirPath path of IFS directory to ensure exists
+ * @returns exists or not_exists
+ */
+export async function ibmi_ifs_checkDir(ifsDirPath: string, serverUrl: string)
+{
+  // const params = { ifsDirPath };
+  // const query = object_toQueryString(params);
+  const libl = 'couri7 aplusb1fcc qtemp';
+  const url = `${serverUrl}/site/common/ifs-action.php`;
+  let message = '';
+  const action = 'checkDir';
+
+  // post to ensure-ifs-dir.php on ibm i server to make sure directory exists.
+  const form = new FormData();
+  form.append('action', action);
+  form.append('dirPath', ifsDirPath);
+
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
+  {
+    const result = await axios.post(url, form,
+      { headers });
+    message = result.data;
+  }
+
+  return message;
+}
