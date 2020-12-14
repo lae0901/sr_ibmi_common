@@ -46,6 +46,9 @@ async function async_main()
 }
 
 // ------------------------------ as400_compile_test ------------------------------
+/**
+ * test compile of object on ibm i
+ */
 async function as400_compile_test()
 {
   const options = {serverUrl:'http://173.54.20.170:10080', curlib:'couri7', 

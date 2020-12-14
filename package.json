@@ -1,6 +1,6 @@
 {
   "name": "sr_ibmi_common",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "description": "ibmi common code used from vscode extension",
   "main": "lib/ibmi-common.js",
   "types": "lib/ibmi-common.d.ts",
@@ -23,13 +23,13 @@
   },
   "homepage": "https://github.com/lae0901/sr_ibmi_common#readme",
   "devDependencies": {
-    "@types/node": "^13.13.30",
-    "sr_test_framework": "^1.0.17",
+    "@types/node": "^13.13.36",
+    "sr_test_framework": "^1.0.18",
     "typescript": "^3.9.7"
   },
   "dependencies": {
     "axios": "^0.19.2",
     "form-data": "^3.0.0",
-    "sr_core_ts": "^1.46.43"
+    "sr_core_ts": "^1.46.50"
   }
 }

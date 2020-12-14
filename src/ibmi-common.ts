@@ -67,6 +67,33 @@ export interface iServerOptions
   joblog?: 'Y' | 'N'
 }
 
+// ------------------------------- iConnectSettings -------------------------------
+/**
+ * connect to ibm i settings. system library name. Then, once user is logged in, 
+ * the login user name, current library ( in which new objects are created ), and
+ * user library list ( where to find database files and source code of the logged
+ * in user. )
+ */
+export interface iConnectSettings
+{
+  /**
+   * url of ibm i server.
+   */
+  serverUrl: string;
+
+  /**
+   * ibm i library that contains autocoder system programs. For example, see ibmi_ifs_getItems
+   * function. That function calls an sql table function on ibm i that returns items from
+   * ifs folder. That sql table function is found in the autocoder system library.
+   */
+  ibmi_autocoder_lib: string;
+
+  ibmi_connect_curlib: string;
+
+  ibmi_connect_libl: string;
+}
+
+// --------------------------------- iCompileLine ---------------------------------
 export interface iCompileLine
 {
   SKIPBFR: string,

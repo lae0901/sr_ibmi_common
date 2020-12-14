@@ -3,7 +3,7 @@
 import { object_toQueryString, string_rtrim, string_matchGeneric, string_assignSubstr } from 'sr_core_ts';
 import axios from 'axios';
 import * as querystring from 'querystring';
-import { sqlTimestamp_toJavascriptDate } from './ibmi-common';
+import { iConnectSettings, sqlTimestamp_toJavascriptDate } from './ibmi-common';
 import * as FormData from 'form-data';
 import { form_getLength } from './common_core';
 
@@ -243,3 +243,4 @@ export async function ibmi_ifs_checkDir(ifsDirPath: string, serverUrl: string)
 
   return message;
 }
+
