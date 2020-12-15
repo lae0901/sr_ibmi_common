@@ -12,7 +12,7 @@
 * iDspffd[] = await as400_dspffd( lib, file, iServerOptions )
 
 ## ibm i ifs functions
-* iIfsItem[] = await ibmi_ifs_getItems( dirPath, itemName, filter_itemType )
+* iIfsItem[] = await ibmi_ifs_getItems( dirPath, connectSettings, filter_itemType )
 * {buf,errmsg} = await ibmi_ifs_getFileContents( filePath )
 * message = await ibmi_ifs_unlink( ifsFilePath, serverUrl )
 * await ibmi_ifs_deleteDir( ifsDirPath, serverUrl )

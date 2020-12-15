@@ -23,64 +23,123 @@ export interface iIfsItem
 // --------------------- ibmi_ifs_getItems -----------------------
 // options:{filterItemName:string, filterItemType:string, joblog:'N'}
 export async function ibmi_ifs_getItems( 
-  dirPath: string, serverUrl:string,
+  dirPath: string, connectSettings: iConnectSettings,
   options?:{filterItemName?:string, filterItemType?:string, joblog?:'Y'|'N', debug?:'Y'|'N'} )
-  : Promise<{rows:iIfsItem[],errmsg:string}>
 {
-  const promise = new Promise<{rows:iIfsItem[],errmsg:string}>(async (resolve, reject) =>
+  const { serverUrl, ibmi_autocoder_lib } = connectSettings ;
+    // const libl = 'couri7 aplusb1fcc qtemp';
+  const libl = ibmi_autocoder_lib;
+  const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
+  const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
+    '                    a.ccsid, a.itemType, a.errmsg ' +
+    'from      table(utl8022_ifsItems(?,?,?)) a ' +
+    'order by  a.itemName ';
+
+  options = options || {} ;
+  const filterItemName = options.filterItemName || '' ;
+  const filterItemType = options.filterItemType || '' ;
+  const joblog = options.joblog || 'N' ;
+  const debug = options.debug || 'N' ;
+
+  const params =
   {
-    const libl = 'couri7 aplusb1fcc qtemp';
-    const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
-    const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
-      '                    a.ccsid, a.itemType, a.errmsg ' +
-      'from      table(utl8022_ifsItems(?,?,?)) a ' +
-      'order by  a.itemName ';
+    libl, sql,
+    parm1: dirPath, parm2: filterItemName, parm3: filterItemType, 
+    debug, joblog
+  };
 
-    options = options || {} ;
-    const filterItemName = options.filterItemName || '' ;
-    const filterItemType = options.filterItemType || '' ;
-    const joblog = options.joblog || 'N' ;
-    const debug = options.debug || 'N' ;
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
 
-    const params =
-    {
-      libl, sql,
-      parm1: dirPath, parm2: filterItemName, parm3: filterItemType, 
-      debug, joblog
-    };
-
-    const query = object_toQueryString(params);
-    const url_query = url + '?' + query;
-
-    const response = await axios({
-      method: 'get', url: url_query, responseType: 'json'
-    });
-
-    let errmsg = '' ;
-    let rows = await response.data;
-
-    if ( typeof rows == 'string')
-    {
-      errmsg = rows as string ;
-      rows = [] ;
-    }
-    else
-    {
-      // convert create and change timestamps to javascript date fields.
-      rows = rows.map((item:any) =>
-      {
-        const { ITEMNAME:itemName, MTIME:mtime, SIZE:size, CCSID:ccsid, 
-                ITEMTYPE:itemType, ERRMSG:errmsg } = item ;
-        const chgDate = sqlTimestamp_toJavascriptDate(item.CHGTS) ;
-        const crtDate = sqlTimestamp_toJavascriptDate(item.CRTTS) ;
-        return { itemName, chgDate, crtDate, mtime, size, ccsid, itemType, errmsg };
-      });
-    }
-
-    resolve({rows,errmsg});
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'json'
   });
-  return promise;
+
+  let errmsg = '' ;
+  let rows = await response.data;
+
+  if ( typeof rows == 'string')
+  {
+    errmsg = rows as string ;
+    rows = [] ;
+  }
+  else
+  {
+    // convert create and change timestamps to javascript date fields.
+    rows = rows.map((item:any) =>
+    {
+      const { ITEMNAME:itemName, MTIME:mtime, SIZE:size, CCSID:ccsid, 
+              ITEMTYPE:itemType, ERRMSG:errmsg } = item ;
+      const chgDate = sqlTimestamp_toJavascriptDate(item.CHGTS) ;
+      const crtDate = sqlTimestamp_toJavascriptDate(item.CRTTS) ;
+      return { itemName, chgDate, crtDate, mtime, size, ccsid, itemType, errmsg };
+    });
+  }
+
+  return { rows, errmsg };
 }
+
+// // --------------------- ibmi_ifs_getItems -----------------------
+// // options:{filterItemName:string, filterItemType:string, joblog:'N'}
+// export async function ibmi_ifs_getItems(
+//   dirPath: string, connectSettings: iConnectSettings,
+//   options?: { filterItemName?: string, filterItemType?: string, joblog?: 'Y' | 'N', debug?: 'Y' | 'N' })
+//   : Promise<{ rows: iIfsItem[], errmsg: string }>
+// {
+//   const promise = new Promise<{ rows: iIfsItem[], errmsg: string }>(async (resolve, reject) =>
+//   {
+//     const libl = 'couri7 aplusb1fcc qtemp';
+//     const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
+//     const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' +
+//       '                    a.ccsid, a.itemType, a.errmsg ' +
+//       'from      table(utl8022_ifsItems(?,?,?)) a ' +
+//       'order by  a.itemName ';
+
+//     options = options || {};
+//     const filterItemName = options.filterItemName || '';
+//     const filterItemType = options.filterItemType || '';
+//     const joblog = options.joblog || 'N';
+//     const debug = options.debug || 'N';
+
+//     const params =
+//     {
+//       libl, sql,
+//       parm1: dirPath, parm2: filterItemName, parm3: filterItemType,
+//       debug, joblog
+//     };
+
+//     const query = object_toQueryString(params);
+//     const url_query = url + '?' + query;
+
+//     const response = await axios({
+//       method: 'get', url: url_query, responseType: 'json'
+//     });
+
+//     let errmsg = '';
+//     let rows = await response.data;
+
+//     if (typeof rows == 'string')
+//     {
+//       errmsg = rows as string;
+//       rows = [];
+//     }
+//     else
+//     {
+//       // convert create and change timestamps to javascript date fields.
+//       rows = rows.map((item: any) =>
+//       {
+//         const { ITEMNAME: itemName, MTIME: mtime, SIZE: size, CCSID: ccsid,
+//           ITEMTYPE: itemType, ERRMSG: errmsg } = item;
+//         const chgDate = sqlTimestamp_toJavascriptDate(item.CHGTS);
+//         const crtDate = sqlTimestamp_toJavascriptDate(item.CRTTS);
+//         return { itemName, chgDate, crtDate, mtime, size, ccsid, itemType, errmsg };
+//       });
+//     }
+
+//     resolve({ rows, errmsg });
+//   });
+//   return promise;
+// }
 
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text

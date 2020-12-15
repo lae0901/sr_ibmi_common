@@ -1,7 +1,7 @@
 import { system_downloadsFolder, object_toQueryString, string_rtrim, 
         string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll } from 'sr_core_ts';
 import axios from 'axios';
-import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd } from '../ibmi-common';
+import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd, iConnectSettings } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir } from '../ibmi-ifs';
 import path = require('path');
@@ -276,8 +276,8 @@ async function test_ifs_getItems(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
   let method = '';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
+  const connectSettings : iConnectSettings = {serverUrl:'http://173.54.20.170:10080', ibmi_autocoder_lib:'couri7',
+                            ibmi_connect_curlib:'', ibmi_connect_libl:''};
   let ifsItems : iIfsItem[] = [] ;
 
   // ibmi_ifs_getItems
@@ -287,7 +287,7 @@ async function test_ifs_getItems(): Promise<{ results: iTestResultItem[] }>
     let errmsg = '';
     const dirPath = '/home/srichter';
     const { rows, errmsg:errText} = await ibmi_ifs_getItems(
-      dirPath, serverUrl, {});
+      dirPath, connectSettings, {});
     ifsItems = rows ;
     if (errText)
       errmsg = `get items from folder ${dirPath} error ${errText}`;
@@ -319,8 +319,10 @@ async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
   let method = '';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
+  const connectSettings: iConnectSettings = {
+    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    ibmi_connect_curlib: '', ibmi_connect_libl: ''
+  };
 
   // ibmi_ifs_getItems
   {
@@ -329,7 +331,7 @@ async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
     let errmsg = '';
     const dirPath = '/home/srichter/.config';
     const { rows, errmsg: errText } = await ibmi_ifs_getItems(
-      dirPath, serverUrl, { joblog:'N'});
+      dirPath, connectSettings, { joblog:'N'});
     if (errText)
       errmsg = `get items from folder ${dirPath} error ${errText}`;
     else if (rows.length > 0)
