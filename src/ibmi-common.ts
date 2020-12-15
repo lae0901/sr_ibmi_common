@@ -88,6 +88,12 @@ export interface iConnectSettings
    */
   ibmi_autocoder_lib: string;
 
+  /**
+   * ibm i ifs folder use by autocoder web services. This ifs_folder path is joined to 
+   * serverUrl to form root URL of the autocoder system web service.
+   */
+  autocoder_ifs_folder: string;
+
   ibmi_connect_curlib: string;
 
   ibmi_connect_libl: string;
@@ -158,7 +164,7 @@ export async function as400_addpfm(
       const serverUrl = options.serverUrl || '';
       let errmsg = '';
 
-      const url = `${serverUrl}/coder/common/json_runSqlReturnEmpty.php`;
+      const url = `${serverUrl}/srichter/autocoder/common/json_runSqlReturnEmpty.php`;
       const params =
       {
         libl, proc: 'system_addpfm',
@@ -464,7 +470,7 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
   const promise = new Promise< iDspfd_mbrlist[]>(async (resolve, reject) =>
   {
     options = options || {};
-    const serverUrl = options.serverUrl || 'http://173.54.20.170:10080';
+    const serverUrl = options.serverUrl ;
     const libl = options.libl || 'couri7 aplusb1fcc qtemp';
     const url = `${serverUrl}/coder/common/json_getManyRows.php`;
 

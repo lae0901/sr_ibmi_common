@@ -1,6 +1,6 @@
 // /src/ibmi-ifs.ts
 
-import { object_toQueryString } from 'sr_core_ts';
+import { object_toQueryString, path_joinUnix } from 'sr_core_ts';
 import axios from 'axios';
 import { iConnectSettings, sqlTimestamp_toJavascriptDate } from './ibmi-common';
 import * as FormData from 'form-data';
@@ -87,6 +87,9 @@ export async function ibmi_ifs_getFileContents( filePath:string,
   const promise = new Promise<{ buf: Buffer, errmsg: string }>(async (resolve, reject) =>
   {
     const libl = 'couri7 aplusb1fcc qtemp';
+    const urlx = path_joinUnix(connectSettings.serverUrl, 
+              connectSettings.autocoder_ifs_folder, 'php/ifs-file-get-contents-based64.php') ;
+
     const url = `${connectSettings.serverUrl}/coder/php/ifs-file-get-contents-base64.php`;
 
     const params =
