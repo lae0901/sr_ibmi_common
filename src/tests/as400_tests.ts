@@ -354,7 +354,10 @@ async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }
   const results = testResults_new();
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
+  const connectSettings: iConnectSettings = {
+    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    ibmi_connect_curlib: '', ibmi_connect_libl: ''
+  };
 
   // ibmi_ifs_getFileContents
   {
@@ -364,7 +367,7 @@ async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }
     const filePath = '/home/srichter/abc.pdf';
     const itemName = '';
     const itemType = '';
-    const {buf, errmsg:errText } = await ibmi_ifs_getFileContents( filePath, serverUrl );
+    const {buf, errmsg:errText } = await ibmi_ifs_getFileContents( filePath, connectSettings );
     if ( errText )
       errmsg = `file ${filePath} read error ${errText}`;
     else if (buf.length > 0)
@@ -393,7 +396,10 @@ async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResu
   const results = testResults_new();
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
+  const connectSettings: iConnectSettings = {
+    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    ibmi_connect_curlib: '', ibmi_connect_libl: ''
+  };
 
   // ibmi_ifs_getFileContents
   {
@@ -403,7 +409,7 @@ async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResu
     const filePath = '/home/srichter/abc xyz.pdf';  // file is not found.
     const itemName = '';
     const itemType = '';
-    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath, serverUrl);
+    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath, connectSettings );
     if (errText)
     {
       passText = `correctly detected file not found. file ${filePath}.`;
@@ -426,13 +432,16 @@ async function test_ifs_dir()
   const results = testResults_new();
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
+  const connectSettings: iConnectSettings = {
+    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    ibmi_connect_curlib: '', ibmi_connect_libl: ''
+  };
 
   // make sure directory exists.       
   {
     method = 'ibmi_ifs_ensureDir';
     const ifsDirPath = '/home/srichter/folder2/steve';
-    const actual = await ibmi_ifs_ensureDir(ifsDirPath, serverUrl);
+    const actual = await ibmi_ifs_ensureDir(ifsDirPath, connectSettings );
     const expected = '';
     testResults_append(results, { method, actual, expected });
   }
@@ -441,7 +450,7 @@ async function test_ifs_dir()
   {
     method = 'ibmi_ifs_checkDir';
     const ifsDirPath = '/home/srichter/folder2/steve';
-    const actual = await ibmi_ifs_checkDir(ifsDirPath, serverUrl);
+    const actual = await ibmi_ifs_checkDir(ifsDirPath, connectSettings);
     const expected = 'exists\n';
     testResults_append(results, { method, actual, expected });
   }
@@ -450,7 +459,7 @@ async function test_ifs_dir()
   {
     method = 'ibmi_ifs_deleteDir';
     const ifsDirPath = '/home/srichter/folder2/steve';
-    const actual = await ibmi_ifs_deleteDir(ifsDirPath, serverUrl);
+    const actual = await ibmi_ifs_deleteDir(ifsDirPath, connectSettings );
     const expected = '';
     testResults_append(results, { method, actual, expected });
   }
@@ -465,13 +474,16 @@ async function test_ifs_unlink()
   const results = testResults_new();
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
+  const connectSettings: iConnectSettings = {
+    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    ibmi_connect_curlib: '', ibmi_connect_libl: ''
+  };
 
   // ibmi_ifs_unlink
   {
     method = 'ibmi_ifs_unlink';
     const ifsFilePath = '/www/zendphp7/htdocs/autocoder/tester/steve.txt';
-    const actual = await ibmi_ifs_unlink(ifsFilePath, serverUrl);
+    const actual = await ibmi_ifs_unlink(ifsFilePath, connectSettings);
     const expected = 'file /www/zendphp7/htdocs/autocoder/tester/steve.txt deleted\n' ;
     testResults_append(results, {method, actual, expected });
   }
