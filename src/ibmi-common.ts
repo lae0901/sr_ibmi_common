@@ -150,7 +150,7 @@ export interface iSrcfMirror
 // --------------------- as400_addpfm -----------------------
 export async function as400_addpfm(
   fileName: string, libName: string, mbrName: string, 
-  textDesc: string, srcType: string, options: iServerOptions):
+  textDesc: string, srcType: string, connectSettings:iConnectSettings):
   Promise<{ errmsg: string }>
 {
   const promise = new Promise<{ errmsg: string }>
@@ -159,12 +159,11 @@ export async function as400_addpfm(
       fileName = fileName || '';
       libName = libName || '';
       mbrName = mbrName || '';
-      const libl = options.libl || 'QGPL QTEMP';
-      const curlib = options.curlib || '';
-      const serverUrl = options.serverUrl || '';
+      const libl = connectSettings.ibmi_autocoder_lib;
+      const serverUrl = connectSettings.serverUrl ;
       let errmsg = '';
 
-      const url = `${serverUrl}/srichter/autocoder/common/json_runSqlReturnEmpty.php`;
+      const url = `${serverUrl}/${connectSettings.autocoder_ifs_folder}/common/json_runSqlReturnEmpty.php`;
       const params =
       {
         libl, proc: 'system_addpfm',
