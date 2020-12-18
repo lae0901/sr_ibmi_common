@@ -276,7 +276,8 @@ async function test_ifs_getItems(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
   let method = '';
-  const connectSettings : iConnectSettings = {serverUrl:'http://173.54.20.170:10080', ibmi_autocoder_lib:'couri7',
+  const connectSettings : iConnectSettings = {serverUrl:'http://173.54.20.170:10080', 
+                    ibmi_autocoder_product_lib:'couri7', autocoder_ifs_product_folder:'',
                             ibmi_connect_curlib:'', ibmi_connect_libl:''};
   let ifsItems : iIfsItem[] = [] ;
 
@@ -320,7 +321,8 @@ async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
   const results = testResults_new();
   let method = '';
   const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    serverUrl: 'http://173.54.20.170:10080', 
+    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
     ibmi_connect_curlib: '', ibmi_connect_libl: ''
   };
 
@@ -355,7 +357,8 @@ async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
   const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    serverUrl: 'http://173.54.20.170:10080',
+    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
     ibmi_connect_curlib: '', ibmi_connect_libl: ''
   };
 
@@ -397,7 +400,8 @@ async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResu
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
   const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    serverUrl: 'http://173.54.20.170:10080', 
+    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
     ibmi_connect_curlib: '', ibmi_connect_libl: ''
   };
 
@@ -433,7 +437,8 @@ async function test_ifs_dir()
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
   const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    serverUrl: 'http://173.54.20.170:10080',
+    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
     ibmi_connect_curlib: '', ibmi_connect_libl: ''
   };
 
@@ -475,7 +480,8 @@ async function test_ifs_unlink()
   let method = '';
   const libl = 'COURI7 APLUSB1FCC QTEMP';
   const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', ibmi_autocoder_lib: 'couri7',
+    serverUrl: 'http://173.54.20.170:10080', 
+    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
     ibmi_connect_curlib: '', ibmi_connect_libl: ''
   };
 

@@ -30,6 +30,6 @@
   "dependencies": {
     "axios": "^0.19.2",
     "form-data": "^3.0.0",
-    "sr_core_ts": "^1.46.51"
+    "sr_core_ts": "^1.46.52"
   }
 }

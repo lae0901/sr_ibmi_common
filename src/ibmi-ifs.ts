@@ -4,7 +4,7 @@ import { object_toQueryString, path_joinUnix } from 'sr_core_ts';
 import axios from 'axios';
 import { iConnectSettings, sqlTimestamp_toJavascriptDate } from './ibmi-common';
 import * as FormData from 'form-data';
-import { form_getLength } from './common_core';
+import { connectionSettings_toProductConnectLibl, form_getLength } from './common_core';
 
 // ----------------------------------- iIfsItem -----------------------------------
 export interface iIfsItem
@@ -25,9 +25,10 @@ export async function ibmi_ifs_getItems(
   dirPath: string, connectSettings: iConnectSettings,
   options?:{filterItemName?:string, filterItemType?:string, joblog?:'Y'|'N', debug?:'Y'|'N'} )
 {
-  const { serverUrl, ibmi_autocoder_lib } = connectSettings ;
-  const libl = ibmi_autocoder_lib;
-  const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getRows_noLogin.php`;
+  // const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
   const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
     '                    a.ccsid, a.itemType, a.errmsg ' +
     'from      table(utl8022_ifsItems(?,?,?)) a ' +
@@ -80,45 +81,37 @@ export async function ibmi_ifs_getItems(
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text
 export async function ibmi_ifs_getFileContents( filePath:string, 
-            connectSettings: iConnectSettings, returnType = 'buf') :
-          Promise<{buf:Buffer,errmsg:string}>
+            connectSettings: iConnectSettings, returnType = 'buf')
 {
   let ifsFilePath = filePath ;
-  const promise = new Promise<{ buf: Buffer, errmsg: string }>(async (resolve, reject) =>
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-file-get-contents-based64.php`;
+  const params =
   {
-    const libl = 'couri7 aplusb1fcc qtemp';
-    const urlx = path_joinUnix(connectSettings.serverUrl, 
-              connectSettings.autocoder_ifs_folder, 'php/ifs-file-get-contents-based64.php') ;
+    libl, fromIfsPath:ifsFilePath,
+    debug: 'N', joblog: 'N'
+  };
 
-    const url = `${connectSettings.serverUrl}/coder/php/ifs-file-get-contents-base64.php`;
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
 
-    const params =
-    {
-      libl, fromIfsPath:ifsFilePath,
-      debug: 'N', joblog: 'N'
-    };
-
-    const query = object_toQueryString(params);
-    const url_query = url + '?' + query;
-
-    const response = await axios({
-      method: 'get', url: url_query, responseType: 'blob'
-    });
-
-    const buf = Buffer.from(response.data, 'base64');
-
-    // check if return data is an errmsg.
-    let errmsg = '' ;
-    if ( buf.length <= 2000 )
-    {
-      const text = buf.toString( ) ;
-      if ((text.length >= 50) && ( text.substr(0,12) == 'error. open '))
-        errmsg = text ;
-    }
-
-    resolve({buf,errmsg});
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'blob'
   });
-  return promise;
+
+  const buf = Buffer.from(response.data, 'base64');
+
+  // check if return data is an errmsg.
+  let errmsg = '' ;
+  if ( buf.length <= 2000 )
+  {
+    const text = buf.toString( ) ;
+    if ((text.length >= 50) && ( text.substr(0,12) == 'error. open '))
+      errmsg = text ;
+  }
+
+  return {buf,errmsg};
 }
 
 // -------------------------------- ibmi_ifs_unlink --------------------------------
@@ -129,10 +122,10 @@ export async function ibmi_ifs_getFileContents( filePath:string,
  */
 export async function ibmi_ifs_unlink(ifsFilePath: string, connectSettings: iConnectSettings )
 {
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/delete-ifs.php`;
   const params = {ifsFilePath} ;
   const query = object_toQueryString(params);
-  const libl = 'couri7 aplusb1fcc qtemp';
-  const url = `${connectSettings.serverUrl}/site/common/delete-ifs.php`;
   let message = '' ;
 
   // post to delete-ifs.php on ibm i server to delete the file.
@@ -158,8 +151,9 @@ export async function ibmi_ifs_unlink(ifsFilePath: string, connectSettings: iCon
  */
 export async function ibmi_ifs_deleteDir(ifsDirPath: string, connectSettings: iConnectSettings)
 {
-  const libl = 'couri7 aplusb1fcc qtemp';
-  const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;
+  // const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
   let message = '';
   const action = 'deleteDir' ;
 
@@ -189,8 +183,9 @@ export async function ibmi_ifs_ensureDir(ifsDirPath: string, connectSettings:iCo
 {
   // const params = { ifsDirPath };
   // const query = object_toQueryString(params);
-  const libl = 'couri7 aplusb1fcc qtemp';
-  const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;
+  // const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
   let message = '';
   const action = 'ensureDir';
 
@@ -221,8 +216,9 @@ export async function ibmi_ifs_checkDir(ifsDirPath: string, connectSettings: iCo
 {
   // const params = { ifsDirPath };
   // const query = object_toQueryString(params);
-  const libl = 'couri7 aplusb1fcc qtemp';
-  const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;
+  // const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
   let message = '';
   const action = 'checkDir';
 

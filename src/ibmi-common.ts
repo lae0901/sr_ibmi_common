@@ -1,12 +1,11 @@
 // media/ibmi_common.ts
 
 import { date_fromISO, date_toEpoch, 
-  object_toQueryString, string_rtrim, string_matchGeneric, string_assignSubstr } from 'sr_core_ts';
+  object_toQueryString, string_assignSubstr } from 'sr_core_ts';
 import axios from 'axios';
-import * as querystring from 'querystring';
 import {  iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink,
           ibmi_ifs_deleteDir, ibmi_ifs_ensureDir, ibmi_ifs_checkDir } from './ibmi-ifs';
-import { form_getLength } from './common_core';
+import { connectionSettings_toProductConnectLibl, form_getLength } from './common_core';
 
 export { iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink, 
         ibmi_ifs_deleteDir, ibmi_ifs_ensureDir, ibmi_ifs_checkDir } ;
@@ -82,17 +81,19 @@ export interface iConnectSettings
   serverUrl: string;
 
   /**
-   * ibm i library that contains autocoder system programs. For example, see ibmi_ifs_getItems
+   * ibm i library that contains autocoder product programs. For example, see ibmi_ifs_getItems
    * function. That function calls an sql table function on ibm i that returns items from
-   * ifs folder. That sql table function is found in the autocoder system library.
+   * ifs folder. That sql table function is found in the autocoder product library.
    */
-  ibmi_autocoder_lib: string;
+  ibmi_autocoder_lib?: string;
+  ibmi_autocoder_product_lib: string;
 
   /**
    * ibm i ifs folder use by autocoder web services. This ifs_folder path is joined to 
-   * serverUrl to form root URL of the autocoder system web service.
+   * serverUrl to form root URL of the autocoder product web service.
    */
-  autocoder_ifs_folder: string;
+  autocoder_ifs_folder?: string;
+  autocoder_ifs_product_folder: string;
 
   ibmi_connect_curlib: string;
 
@@ -150,262 +151,234 @@ export interface iSrcfMirror
 // --------------------- as400_addpfm -----------------------
 export async function as400_addpfm(
   fileName: string, libName: string, mbrName: string, 
-  textDesc: string, srcType: string, connectSettings:iConnectSettings):
-  Promise<{ errmsg: string }>
+  textDesc: string, srcType: string, 
+  connectSettings: iConnectSettings, options?: iServerOptions )
 {
-  const promise = new Promise<{ errmsg: string }>
-    (async (resolve, reject) =>
-    {
-      fileName = fileName || '';
-      libName = libName || '';
-      mbrName = mbrName || '';
-      const libl = connectSettings.ibmi_autocoder_lib;
-      const serverUrl = connectSettings.serverUrl ;
-      let errmsg = '';
+  fileName = fileName || '';
+  libName = libName || '';
+  mbrName = mbrName || '';
+  const libl = connectionSettings_toProductConnectLibl( connectSettings ) ;
+  const serverUrl = connectSettings.serverUrl ;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  let errmsg = '';
 
-      const url = `${serverUrl}/${connectSettings.autocoder_ifs_folder}/common/json_runSqlReturnEmpty.php`;
-      const params =
-      {
-        libl, proc: 'system_addpfm',
-        outParm1: errmsg, parm2: fileName,
-        parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
-      }
-      const query = object_toQueryString(params);
-      const url_query = url + '?' + query;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_runSqlReturnEmpty.php`;
+  const params =
+  {
+    libl, proc: 'system_addpfm', joblog,
+    outParm1: errmsg, parm2: fileName,
+    parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
+  }
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
 
-      const response = await axios({
-        method: 'get', url: url_query, responseType: 'json'
-      });
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'json'
+  });
 
-      let data = await response.data;
-      errmsg = data.outParm1.trim( );
-      resolve({ errmsg });
-    });
-
-  return promise;
+  let data = await response.data;
+  errmsg = data.outParm1.trim( );
+  return { errmsg } ;
 }
 
 // --------------------- as400_chgpfm -----------------------
 export async function as400_chgpfm(
   fileName: string, libName: string, mbrName: string,
-  textDesc: string, srcType: string, options: iServerOptions):
-  Promise<{ errmsg: string }>
+  textDesc: string, srcType: string, 
+  connectSettings: iConnectSettings, options?: iServerOptions )
 {
-  const promise = new Promise<{ errmsg: string }>
-    (async (resolve, reject) =>
-    {
-      fileName = fileName || '';
-      libName = libName || '';
-      mbrName = mbrName || '';
-      const libl = options.libl || 'QGPL QTEMP';
-      const curlib = options.curlib || '';
-      const serverUrl = options.serverUrl || '';
-      const joblog = options.joblog || 'N' ;
-      let errmsg = '';
+  fileName = fileName || '';
+  libName = libName || '';
+  mbrName = mbrName || '';
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {} ;
+  const joblog = options.joblog || 'N' ;
+  let errmsg = '';
 
-      const url = `${serverUrl}/coder/common/json_runSqlReturnEmpty.php`;
-      const params =
-      {
-        libl, proc: 'system_chgpfm', joblog,
-        outParm1: errmsg, parm2: fileName,
-        parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
-      }
-      const query = object_toQueryString(params);
-      const url_query = url + '?' + query;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_runSqlReturnEmpty.php`;
+  const params =
+  {
+    libl, proc: 'system_chgpfm', joblog,
+    outParm1: errmsg, parm2: fileName,
+    parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
+  }
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
 
-      const response = await axios({
-        method: 'get', url: url_query, responseType: 'json'
-      });
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'json'
+  });
 
-      let data = await response.data;
-      errmsg = data.outParm1.trim();
-      resolve({ errmsg });
-    });
-
-  return promise;
+  let data = await response.data;
+  errmsg = data.outParm1.trim();
+  return { errmsg } ;
 }
 
 // --------------------- as400_compile -----------------------
-export async function as400_compile( 
-      srcfName:string, srcfLib:string, 
-      srcmbr:string, options:iServerOptions ) :
-      Promise<{compMsg:string, compile:iCompileLine[], joblog:string[]}>
+export async function as400_compile( srcfName:string, srcfLib:string, 
+            srcmbr:string, 
+            connectSettings: iConnectSettings, options?: iServerOptions)
 {
-  const promise = new Promise<{ compMsg: string, compile: iCompileLine[], joblog: string[] }> 
-    ( async (resolve, reject) =>
+  srcfName = srcfName || '';
+  srcfLib = srcfLib || '';
+  srcmbr = srcmbr || '';
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const curlib = options.curlib ? options.curlib : connectSettings.ibmi_connect_curlib;
+  let compMsg = '';
+  let compile:iCompileLine[] = [] ;
+
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
+  const params = 
   {
-    srcfName = srcfName || '';
-    srcfLib = srcfLib || '';
-    srcmbr = srcmbr || '';
-    const libl = options.libl || 'QGPL QTEMP';
-    const curlib = options.curlib || '';
-    const serverUrl = options.serverUrl || '' ;
-    let compMsg = '';
-    let compile:iCompileLine[] = [] ;
-    let joblog:string[] = [] ;
+    libl, proc: 'utl7960_compile', 
+    outParm1: compMsg, parm2: srcfName,
+    parm3: srcfLib, parm4: srcmbr, parm5: curlib
+  }
+  const query = object_toQueryString(params) ;
+  const url_query = url + '?' + query ;
 
-    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
-    const params = 
-    {
-      libl, proc: 'utl7960_compile', 
-      outParm1: compMsg, parm2: srcfName,
-      parm3: srcfLib, parm4: srcmbr, parm5: curlib
-    }
-    const query = object_toQueryString(params) ;
-    const url_query = url + '?' + query ;
-
-    const response = await axios({
-      method: 'get', url: url_query, responseType: 'json'
-    });
-
-    let data = await response.data;
-    compMsg = data.outParm1;
-    compile = data.set1 || [] ;
-    joblog  = data.set2 || [] ;
-    resolve( { compMsg, compile, joblog });
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'json'
   });
 
-  return promise;
+  let data = await response.data;
+  compMsg = data.outParm1;
+  compile = data.set1 || [] ;
+  const compile_joblog  = data.set2 || [] ;
+  return { compMsg, compile, joblog:compile_joblog };
 }
 // --------------------- as400_dspffd -----------------------
 // return array of srcmbrs of a srcfile.
 export async function as400_dspffd(libName: string, fileName: string,
-  options?: iServerOptions)
-  : Promise<iDspffd[] | undefined>
+  connectSettings: iConnectSettings, options?: iServerOptions)
 {
-  const promise = new Promise<iDspffd[] | undefined>(async (resolve, reject) =>
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
+
+  const sql = 'select    a.* ' +
+    'from      table(system_dspffd(?,?)) a ' ;
+  const params =
   {
-    options = options || {};
-    const serverUrl = options.serverUrl || 'http://173.54.20.170:10080';
-    const libl = options.libl || 'couri7 aplusb1fcc qtemp';
-    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
+    libl, sql, joblog,
+    parm1: libName, parm2: fileName, debug: 'N'
+  };
 
-    const sql = 'select    a.* ' +
-      'from      table(system_dspffd(?,?)) a ' ;
-    const params =
-    {
-      libl, sql,
-      parm1: libName, parm2: fileName, debug: 'N'
-    };
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
 
-    const query = object_toQueryString(params);
-    const url_query = url + '?' + query;
-
-    const response = await axios({
-      method: 'get', url: url_query, responseType: 'json'
-    });
-
-    let data = await response.data;
-    let rows = data.set1 as iDspffd[] | undefined;
-    if ( rows && rows.length == 0 )
-      rows = undefined ;
-
-    resolve(rows);
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'json'
   });
-  return promise;
+
+  let data = await response.data;
+  let rows = data.set1 as iDspffd[] | undefined;
+  if ( rows && rows.length == 0 )
+    rows = undefined ;
+
+  return rows ;
 }
 
 // --------------------- as400_rmvm -----------------------
 export async function as400_rmvm(
-  fileName: string, libName: string, mbrName: string, options: iServerOptions):
-  Promise<{ errmsg: string }>
+  fileName: string, libName: string, mbrName: string,
+  connectSettings: iConnectSettings, options ?: iServerOptions)
 {
-  const promise = new Promise<{ errmsg: string }>
-    (async (resolve, reject) =>
-    {
-      fileName = fileName || '';
-      libName = libName || '';
-      mbrName = mbrName || '';
-      const libl = options.libl || 'QGPL QTEMP';
-      const curlib = options.curlib || '';
-      const serverUrl = options.serverUrl || '';
-      let errmsg = '';
+  fileName = fileName || '';
+  libName = libName || '';
+  mbrName = mbrName || '';
 
-      const url = `${serverUrl}/coder/common/json_runSqlReturnEmpty.php`;
-      const params =
-      {
-        libl, proc: 'system_rmvm',
-        outParm1: errmsg, parm2: fileName,
-        parm3: libName, parm4: mbrName
-      }
-      const query = object_toQueryString(params);
-      const url_query = url + '?' + query;
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_runSqlReturnEmpty.php`;
+  let errmsg = '';
+  const params =
+  {
+    libl, proc: 'system_rmvm', joblog,
+    outParm1: errmsg, parm2: fileName,
+    parm3: libName, parm4: mbrName
+  }
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
 
-      const response = await axios({
-        method: 'get', url: url_query, responseType: 'json'
-      });
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'json'
+  });
 
-      let data = await response.data;
-      errmsg = data.outParm1.trim( );
-      resolve({ errmsg });
-    });
-
-  return promise;
+  let data = await response.data;
+  errmsg = data.outParm1.trim( );
+  return { errmsg } ;
 }
 
 // --------------------- as400_srcfList -----------------------
-export function as400_srcfList(objName: string, libName: string, options?: iServerOptions) : Promise<{}[]>
+export async function as400_srcfList(objName: string, libName: string,  
+                connectSettings: iConnectSettings, options ?: iServerOptions)
 {
-  const promise = new Promise<{}[]> (async (resolve, reject) =>
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
+  const params =
   {
-    options = options || {} ;
-    const serverUrl = options.serverUrl || 'http://173.54.20.170:10080' ;
-    const libl = options.libl || 'couri7 aplusb1fcc qtemp';
-    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
-    const params =
-    {
-      libl, proc: 'utl8020_srcfList',
-      parm1: objName, parm2: libName, debug: 'N'
-    };
+    libl, proc: 'utl8020_srcfList',
+    parm1: objName, parm2: libName, debug: 'N'
+  };
 
-    const response = await axios({
-      method: 'get', url, data: params, responseType: 'json'
-    });
-
-    const respText = await response.data;
-    const rows = JSON.parse(respText);
-
-    resolve(rows.set1);
+  const response = await axios({
+    method: 'get', url, data: params, responseType: 'json'
   });
 
-  return promise;
+  const respText = await response.data;
+  const rows = JSON.parse(respText);
+  return rows.set1 as {}[] ;
 }
 
 // --------------------- as400_routines -----------------------
-export function as400_routines(libName: string, routineName: string): Promise<{}[]>
+export async function as400_routines(libName: string, routineName: string, 
+                connectSettings: iConnectSettings, options ?: iServerOptions)
 {
-  const promise = new Promise<{}[]>(async (resolve, reject) =>
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
+  const params =
   {
-    const libl = 'couri7 aplusb1fcc qtemp';
-    const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
-    const params =
-    {
-      libl, proc: 'utl8020_routines',
-      parm1: libName, parm2: routineName, debug: 'N'
-    };
+    libl, proc: 'utl8020_routines',
+    parm1: libName, parm2: routineName, debug: 'N'
+  };
 
-    const response = await axios({
-      method: 'get', url, data: params, responseType: 'json'
-    });
-
-    const respText = await response.data;
-    const rows = JSON.parse(respText);
-
-    resolve(rows.set1);
+  const response = await axios({
+    method: 'get', url, data: params, responseType: 'json'
   });
 
-  return promise;
+  const respText = await response.data;
+  const rows = JSON.parse(respText);
+
+  return rows.set1 as {}[] ;
 }
 
 // --------------------- as400_srcmbrLines -----------------------
-export async function as400_srcmbrLines(libName: string, fileName: string, mbrName: string)
-  : Promise<iSrcmbrLine[]>
+export async function as400_srcmbrLines(libName: string, fileName: string, 
+                  mbrName: string,
+                  connectSettings: iConnectSettings, options ?: iServerOptions)
 {
-  const promise = new Promise<iSrcmbrLine[]>(async (resolve, reject) =>
-  {
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
 
-  const libl = 'couri7 aplusb1fcc qtemp';
-  const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
   const sql = 'select    a.seqnbr, char(a.chgdate,iso) chgdate, a.text ' +
     'from      table(system_srcmbr_lines(?,?,?)) a ' +
     'order by  a.seqnbr ';
@@ -431,9 +404,7 @@ export async function as400_srcmbrLines(libName: string, fileName: string, mbrNa
     // const ch1 = '1' ;
   }
 
-  resolve(rows.set1);
-}) ;
-return promise ;
+  return rows.set1 as iSrcmbrLine[] ;
 }
 
 // ------------------- respText_extractErrorText ---------------------------
@@ -462,61 +433,61 @@ function respText_extractErrorText(respText:string)
 
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.
-export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string = '', 
-        options?: iServerOptions )
-  : Promise<iDspfd_mbrlist[]>
+export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string, 
+  connectSettings: iConnectSettings, options?: iServerOptions)
 {
-  const promise = new Promise< iDspfd_mbrlist[]>(async (resolve, reject) =>
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
+
+  const sql = 'select    a.* ' +
+    'from      table(system_dspfd_mbrlist(?,?,?)) a ' +
+    'order by  a.mbrname ';
+  const params =
   {
-    options = options || {};
-    const serverUrl = options.serverUrl ;
-    const libl = options.libl || 'couri7 aplusb1fcc qtemp';
-    const url = `${serverUrl}/coder/common/json_getManyRows.php`;
+    libl, sql, joblog,
+    parm1: fileName, parm2: libName, parm3:mbrName, debug: 'N'
+  };
 
-    const sql = 'select    a.* ' +
-      'from      table(system_dspfd_mbrlist(?,?,?)) a ' +
-      'order by  a.mbrname ';
-    const params =
-    {
-      libl, sql,
-      parm1: fileName, parm2: libName, parm3:mbrName, debug: 'N'
-    };
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
 
-    const query = object_toQueryString(params);
-    const url_query = url + '?' + query;
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'json'
+  });
 
-    const response = await axios({
-      method: 'get', url: url_query, responseType: 'json'
-    });
+  let data = await response.data;
+  let rows = data.set1 as iDspfd_mbrlist[];
 
-    let data = await response.data;
-    let rows = data.set1 as iDspfd_mbrlist[];
+  // calc mtime and add to the member info object.
+  rows = rows.map((item) =>
+  {
+    const { CHGDATE, CHGTIME } = item ;
+    const dt = date_fromISO(CHGDATE, CHGTIME) ;
+    const mtime = date_toEpoch(dt) ;
+    return {...item, mtime } ;
+  });
 
-    // calc mtime and add to the member info object.
-    rows = rows.map((item) =>
-    {
-      const { CHGDATE, CHGTIME } = item ;
-      const dt = date_fromISO(CHGDATE, CHGTIME) ;
-      const mtime = date_toEpoch(dt) ;
-      return {...item, mtime } ;
-    });
-
-    resolve(rows) ;
-  }) ;
-  return promise ;
+  return rows ;
 }
 
 // --------------------- as400_tablesAndViews_select -----------------------
-export async function as400_tablesAndViews_select(schema: string, collName: string, maxRows: number = 500)
-  : Promise<[{ SCHEMA: string, COLLNAME: string, COLLTYPE: string }]>
+export async function as400_tablesAndViews_select(schema: string, collName: string, 
+                connectSettings: iConnectSettings, options?: iServerOptions)
 {
-  const libl = 'couri7 aplusb1fcc qtemp';
-  const url = 'http://173.54.20.170:10080/coder/common/json_getManyRows.php';
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  options = options || {};
+  const joblog = options.joblog || 'N';
+  const maxRows = options.numRows ? options.numRows : 500 ;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
   const sql = 'call    system_tablesAndViews_select(?,?,?) ';
 
   const params =
   {
-    libl, sql,
+    libl, sql, joblog,
     parm1: schema, parm2: collName, parm3: maxRows, debug: 'N'
   };
 
@@ -529,7 +500,7 @@ export async function as400_tablesAndViews_select(schema: string, collName: stri
 
   const rows = await response.data;
 
-  return rows.set1;
+  return rows.set1 as { SCHEMA: string, COLLNAME: string, COLLTYPE: string }[] ;
 }
 
 // ------------------------- sqlTimestamp_toJavascriptDate -------------------------
