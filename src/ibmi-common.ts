@@ -166,7 +166,7 @@ export async function as400_addpfm(
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_runSqlReturnEmpty.php`;
   const params =
   {
-    libl, proc: 'system_addpfm', joblog,
+    libl, proc: 'kystem_addpfm', joblog,
     outParm1: errmsg, parm2: fileName,
     parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
   }
@@ -200,7 +200,7 @@ export async function as400_chgpfm(
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_runSqlReturnEmpty.php`;
   const params =
   {
-    libl, proc: 'system_chgpfm', joblog,
+    libl, proc: 'kystem_chgpfm', joblog,
     outParm1: errmsg, parm2: fileName,
     parm3: libName, parm4: mbrName, parm5: textDesc, parm6: srcType
   }
@@ -235,7 +235,7 @@ export async function as400_compile( srcfName:string, srcfLib:string,
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
   const params = 
   {
-    libl, proc: 'utl7960_compile', 
+    libl, proc: 'ktl7960_compile', 
     outParm1: compMsg, parm2: srcfName,
     parm3: srcfLib, parm4: srcmbr, parm5: curlib
   }
@@ -264,7 +264,7 @@ export async function as400_dspffd(libName: string, fileName: string,
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
 
   const sql = 'select    a.* ' +
-    'from      table(system_dspffd(?,?)) a ' ;
+    'from      table(kystem_dspffd(?,?)) a ' ;
   const params =
   {
     libl, sql, joblog,
@@ -303,7 +303,7 @@ export async function as400_rmvm(
   let errmsg = '';
   const params =
   {
-    libl, proc: 'system_rmvm', joblog,
+    libl, proc: 'kystem_rmvm', joblog,
     outParm1: errmsg, parm2: fileName,
     parm3: libName, parm4: mbrName
   }
@@ -380,7 +380,7 @@ export async function as400_srcmbrLines(libName: string, fileName: string,
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
 
   const sql = 'select    a.seqnbr, char(a.chgdate,iso) chgdate, a.text ' +
-    'from      table(system_srcmbr_lines(?,?,?)) a ' +
+    'from      table(kystem_srcmbr_lines(?,?,?)) a ' +
     'order by  a.seqnbr ';
 
   const params =
@@ -443,7 +443,7 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getManyRows.php`;
 
   const sql = 'select    a.* ' +
-    'from      table(system_dspfd_mbrlist(?,?,?)) a ' +
+    'from      table(kystem_dspfd_mbrlist(?,?,?)) a ' +
     'order by  a.mbrname ';
   const params =
   {

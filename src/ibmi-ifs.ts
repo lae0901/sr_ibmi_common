@@ -28,10 +28,9 @@ export async function ibmi_ifs_getItems(
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_getRows_noLogin.php`;
-  // const url = `${serverUrl}/coder/common/json_getRows_noLogin.php`;
   const sql = 'select    a.itemName, a.crtTs, a.chgTs, a.mtime, a.size, ' + 
     '                    a.ccsid, a.itemType, a.errmsg ' +
-    'from      table(utl8022_ifsItems(?,?,?)) a ' +
+    'from      table(ktl8022_ifsItems(?,?,?)) a ' +
     'order by  a.itemName ';
 
   options = options || {} ;
@@ -86,7 +85,7 @@ export async function ibmi_ifs_getFileContents( filePath:string,
   let ifsFilePath = filePath ;
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
-  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-file-get-contents-based64.php`;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-file-get-contents-base64.php`;
   const params =
   {
     libl, fromIfsPath:ifsFilePath,
@@ -181,11 +180,8 @@ export async function ibmi_ifs_deleteDir(ifsDirPath: string, connectSettings: iC
  */
 export async function ibmi_ifs_ensureDir(ifsDirPath: string, connectSettings:iConnectSettings)
 {
-  // const params = { ifsDirPath };
-  // const query = object_toQueryString(params);
   const serverUrl = connectSettings.serverUrl;
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;
-  // const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
   let message = '';
   const action = 'ensureDir';
 
@@ -214,11 +210,8 @@ export async function ibmi_ifs_ensureDir(ifsDirPath: string, connectSettings:iCo
  */
 export async function ibmi_ifs_checkDir(ifsDirPath: string, connectSettings: iConnectSettings )
 {
-  // const params = { ifsDirPath };
-  // const query = object_toQueryString(params);
   const serverUrl = connectSettings.serverUrl;
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;
-  // const url = `${connectSettings.serverUrl}/site/common/ifs-action.php`;
   let message = '';
   const action = 'checkDir';
 

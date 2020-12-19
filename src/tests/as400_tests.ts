@@ -14,7 +14,11 @@ async_main();
 async function async_main()
 {
   const results = testResults_new();
-  await as400_compile_test();
+
+  {
+    const res = await as400_compile_test();
+    results.push(...res) ;
+  }
 
   // addpfm, rmvm
   {
@@ -41,8 +45,18 @@ async function async_main()
   }
 
   testResults_consoleLog(results);
-
   return;
+}
+
+// --------------------------- test_connectSettings_new ---------------------------
+function test_connectSettings_new( )
+{
+  const connectSettings: iConnectSettings = {
+    serverUrl: 'http://173.54.20.170:10080',
+    ibmi_autocoder_product_lib: 'autocoder', autocoder_ifs_product_folder: 'srichter/autocoder',
+    ibmi_connect_curlib: 'glide', ibmi_connect_libl: 'glide'
+  };
+  return connectSettings;
 }
 
 // ------------------------------ as400_compile_test ------------------------------
@@ -51,42 +65,48 @@ async function async_main()
  */
 async function as400_compile_test()
 {
-  const options = {serverUrl:'http://173.54.20.170:10080', curlib:'couri7', 
-                    libl:'couri7 qgpl'};
+  const results = testResults_new();
+  const connectSettings = test_connectSettings_new() ;
   const srcfName = 'QRPGLESRC' ;
-  const srcfLib = 'COURI7' ;
-  const srcmbr = 'UTL7140R' ;
-  const rv = await as400_compile(srcfName, srcfLib, srcmbr, options ) ;
+  const srcfLib = 'GLIDE' ;
+  const srcmbr = 'GLID0033GR' ;
 
-  console.log(rv.compMsg);
-  for (let ix = 0; ix < rv.compile.length && ix < 25; ++ix)
   {
-    const line = rv.compile[ix];
-    console.log(line.LINE);
+    const method = 'as400_compile' ;
+    const rv = await as400_compile(srcfName, srcfLib, srcmbr, connectSettings ) ;
+    const actual = rv.compMsg ;
+    const expected = `RPGLE pgm created ${srcmbr}`;
+
+    console.log(rv.compMsg);
+    for (let ix = 0; ix < rv.compile.length && ix < 25; ++ix)
+    {
+      const line = rv.compile[ix];
+      console.log(line.LINE);
+    }
+    testResults_append(results, {method, actual, expected });
   }
+
+  return results ;
 }
 
 // ---------------------------------- as400_member_test ----------------------------------
 // add and remove member from file.
 async function as400_member_test(): Promise<{ results: iTestResultItem[] }>
 {
+  const connectSettings = test_connectSettings_new();
   const results = testResults_new();
   let method = '';
   let fileName = 'QRPGLESRC' ;
-  let libName = 'COURI7' ;
+  let libName = 'glide' ;
   let mbrName = 'STEVETEST' ;
   let textDesc = 'test member' ;
   let srcType = 'TXT' ;
-  const libl = 'COURI7 APLUSB1FCC QTEMP' ;
-  const serverUrl = 'http://173.54.20.170:10080' ;
-
-  const options :iServerOptions = { libl, serverUrl, joblog:'N' } ;
 
   // addpfm 
   {
-    method = 'system_addpfm';
+    method = 'as400_addpfm';
     let passText = '';
-    const { errmsg } = await as400_addpfm( fileName, libName, mbrName, textDesc, srcType, options );
+    const { errmsg } = await as400_addpfm( fileName, libName, mbrName, textDesc, srcType, connectSettings );
     if ( !errmsg )
     {
       passText = 'addpfm successful.';
@@ -97,8 +117,8 @@ async function as400_member_test(): Promise<{ results: iTestResultItem[] }>
   // rmvm
   {
     let passText = '';
-    method = 'system_rmvm';
-    const { errmsg } = await as400_rmvm(fileName, libName, mbrName, options);
+    method = 'as400_rmvm';
+    const { errmsg } = await as400_rmvm(fileName, libName, mbrName, connectSettings);
     if (!errmsg)
     {
       passText = `rmvpfm from file ${fileName} member {mbrName}.`;
@@ -114,22 +134,19 @@ async function as400_member_test(): Promise<{ results: iTestResultItem[] }>
 async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
+  const connectSettings = test_connectSettings_new();
 
   let method = '';
   let fileName = 'STEVESRC';
-  let libName = 'COURI7';
+  let libName = 'glide';
   let mbrName = 'BATLABR';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
-
-  const options : iServerOptions = { libl, serverUrl };
 
   // as400_srcmbrLines 
   {
     method = 'as400_srcmbrLines';
     const desc = `read srcmbr lines from ${mbrName}`;
     const expected = 235;
-    const lines = await as400_srcmbrLines( libName, fileName, mbrName);
+    const lines = await as400_srcmbrLines( libName, fileName, mbrName, connectSettings);
     const testResult = typeof lines == 'string' ? lines : lines.length ;
 
     testResults_append(results, { desc, method, expected, testResult });
@@ -139,7 +156,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   {
     let fileName = 'steveSRC' ;
     let mbrName = 'bom*' ;
-    const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
+    const mbrList = await as400_srcmbrList(libName, fileName, mbrName, connectSettings);
     method = 'as400_srcmbrList';
 
     {
@@ -154,7 +171,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
       const desc = `calc member list item mtime`;
       let aspect = 'calc mtime';
       const member_item = mbrList[0] ;
-      const expected = 1601921828;
+      const expected = 1608315956;
       const testResult = member_item.mtime;
       testResults_append(results, { method, aspect, desc, expected, testResult });
     }
@@ -176,7 +193,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   let orig_srcType = '' ;
   let orig_mbrText = '' ;
   {
-    const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
+    const mbrList = await as400_srcmbrList(libName, fileName, mbrName, connectSettings);
     orig_srcType = mbrList[0].SRCTYPE;
     orig_mbrText = mbrList[0].MBRTEXT;
   }
@@ -188,7 +205,8 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
     method = 'as400_chgpfm';
     const desc = `change srctype and text description of ${mbrName}`;
     const expected = 'successful';
-    const {errmsg} = await as400_chgpfm(fileName, libName, mbrName, chg_mbrText, chg_srcType, options);
+    const {errmsg} = await as400_chgpfm(fileName, libName, mbrName, chg_mbrText, chg_srcType,
+                  connectSettings);
     const testResult = errmsg ? errmsg : 'successful';
     testResults_append(results, { desc, method, expected, testResult });
   }
@@ -197,7 +215,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   let cur_srcType = '';
   let cur_mbrText = '';
   {
-    const mbrList = await as400_srcmbrList(libName, fileName, mbrName);
+    const mbrList = await as400_srcmbrList(libName, fileName, mbrName, connectSettings);
     cur_srcType = mbrList[0].SRCTYPE;
     cur_mbrText = mbrList[0].MBRTEXT;
   }
@@ -217,7 +235,8 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
     const aspect = 'restore srctype' ;
     const desc = 'change srctype and mbrText back to original values' ;
     const expected = orig_srcType + orig_mbrText;
-    const { errmsg } = await as400_chgpfm(fileName, libName, mbrName, orig_mbrText, orig_srcType, options);
+    const { errmsg } = await as400_chgpfm(fileName, libName, mbrName, orig_mbrText, orig_srcType, 
+                            connectSettings );
     const testResult = errmsg ? errmsg : orig_srcType + orig_mbrText;
     testResults_append(results, { desc, method, expected, testResult });
   }
@@ -227,7 +246,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
 
 // ---------------------------------- ifs_ibmi_test ----------------------------------
 // add and remove member from file.
-async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
+async function ifs_ibmi_test() 
 {
   const results = testResults_new();
 
@@ -272,13 +291,11 @@ async function ifs_ibmi_test(): Promise<{ results: iTestResultItem[] }>
 
 // ---------------------------------- test_ifs_getItems ----------------------------------
 // add and remove member from file.
-async function test_ifs_getItems(): Promise<{ results: iTestResultItem[] }>
+async function test_ifs_getItems() 
 {
   const results = testResults_new();
   let method = '';
-  const connectSettings : iConnectSettings = {serverUrl:'http://173.54.20.170:10080', 
-                    ibmi_autocoder_product_lib:'couri7', autocoder_ifs_product_folder:'',
-                            ibmi_connect_curlib:'', ibmi_connect_libl:''};
+  const connectSettings = test_connectSettings_new();
   let ifsItems : iIfsItem[] = [] ;
 
   // ibmi_ifs_getItems
@@ -290,16 +307,10 @@ async function test_ifs_getItems(): Promise<{ results: iTestResultItem[] }>
     const { rows, errmsg:errText} = await ibmi_ifs_getItems(
       dirPath, connectSettings, {});
     ifsItems = rows ;
-    if (errText)
-      errmsg = `get items from folder ${dirPath} error ${errText}`;
-    else if (ifsItems.length > 0)
-    {
-      passText = `read ifs items from folder ${dirPath}.`;
-    }
-    else
-      errmsg = `no items returned from folder ${dirPath}`;
-
-    testResults_append(results, passText, errmsg, method);
+    const actual = { numRows:rows.length, errText } ;
+    const expected = { numRows: 65, errText:''} ;
+    const desc = `get items from folder ${dirPath}`;
+    testResults_append(results, { method, desc, expected, actual });
   }
 
   // test that a specific item was returned in the list of ifs items.
@@ -320,11 +331,7 @@ async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
   let method = '';
-  const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', 
-    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
-    ibmi_connect_curlib: '', ibmi_connect_libl: ''
-  };
+  const connectSettings = test_connectSettings_new();
 
   // ibmi_ifs_getItems
   {
@@ -351,16 +358,11 @@ async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
 
 // ------------------------------ ifs_ibmi_getFileContents --------------------
 // add and remove member from file.
-async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }>
+async function ifs_ibmi_getFileContents()  
 {
   const results = testResults_new();
   let method = '';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080',
-    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
-    ibmi_connect_curlib: '', ibmi_connect_libl: ''
-  };
+  const connectSettings = test_connectSettings_new();
 
   // ibmi_ifs_getFileContents
   {
@@ -394,16 +396,11 @@ async function ifs_ibmi_getFileContents(): Promise<{results: iTestResultItem[] }
 
 // ------------------------------ ifs_ibmi_getFileContents_notFound --------------------
 // add and remove member from file.
-async function ifs_ibmi_getFileContents_notFound(): Promise<{ results: iTestResultItem[] }>
+async function ifs_ibmi_getFileContents_notFound()  
 {
   const results = testResults_new();
   let method = '';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', 
-    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
-    ibmi_connect_curlib: '', ibmi_connect_libl: ''
-  };
+  const connectSettings = test_connectSettings_new();
 
   // ibmi_ifs_getFileContents
   {
@@ -435,12 +432,7 @@ async function test_ifs_dir()
 {
   const results = testResults_new();
   let method = '';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080',
-    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
-    ibmi_connect_curlib: '', ibmi_connect_libl: ''
-  };
+  const connectSettings = test_connectSettings_new();
 
   // make sure directory exists.       
   {
@@ -478,12 +470,7 @@ async function test_ifs_unlink()
 {
   const results = testResults_new();
   let method = '';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const connectSettings: iConnectSettings = {
-    serverUrl: 'http://173.54.20.170:10080', 
-    ibmi_autocoder_product_lib: 'couri7', autocoder_ifs_product_folder: '',
-    ibmi_connect_curlib: '', ibmi_connect_libl: ''
-  };
+  const connectSettings = test_connectSettings_new();
 
   // ibmi_ifs_unlink
   {
@@ -502,21 +489,18 @@ async function test_ifs_unlink()
 async function as400_dspffd_test(): Promise<{ results: iTestResultItem[] }>
 {
   const results = testResults_new();
+  const connectSettings = test_connectSettings_new();
 
   let method = '';
   let fileName = 'ITMST';
   let libName = 'APLUSB1FCC';
-  const libl = 'COURI7 APLUSB1FCC QTEMP';
-  const serverUrl = 'http://173.54.20.170:10080';
-
-  const options: iServerOptions = { libl, serverUrl };
 
   // as400_dspffd 
   {
     method = 'as400_dspffd';
     const desc = `read fields from ${fileName}`;
     const expected = 94;
-    const flds = await as400_dspffd(libName, fileName, options);
+    const flds = await as400_dspffd(libName, fileName, connectSettings);
     const actual = flds ? flds.length : 0 ;
 
     testResults_append(results, { desc, method, expected, actual });
