@@ -18,6 +18,7 @@
 * await ibmi_ifs_deleteDir( ifsDirPath, serverUrl )
 * await ibmi_ifs_ensureDir( ifsDirPath, serverUrl )
 * await ibmi_ifs_checkDir( ifsDirPath, serverUrl )
+* {mtime,size} = await ibmi_ifs_uploadFile( filePath, ifsFilePath, connectSettings )
 
 ## interfaces
 ```

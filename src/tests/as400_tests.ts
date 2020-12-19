@@ -1,11 +1,12 @@
 import { system_downloadsFolder, object_toQueryString, string_rtrim, 
-        string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll } from 'sr_core_ts';
+        string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll, dir_mkdir, dir_ensureExists, file_writeText } from 'sr_core_ts';
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd, iConnectSettings } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
-import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir } from '../ibmi-ifs';
+import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir, ibmi_ifs_uploadFile } from '../ibmi-ifs';
 import path = require('path');
 import * as fs from 'fs' ;
+import * as os from 'os' ;
 
 // run main function that is declared as async. 
 async_main();
@@ -286,6 +287,12 @@ async function ifs_ibmi_test()
     results.push(...res);
   }
 
+  // test_ifs_upload
+  {
+    const { results: res } = await test_ifs_upload();
+    results.push(...res);
+  }
+
   return { results }
 }
 
@@ -479,6 +486,40 @@ async function test_ifs_unlink()
     const actual = await ibmi_ifs_unlink(ifsFilePath, connectSettings);
     const expected = 'file /www/zendphp7/htdocs/autocoder/tester/steve.txt deleted\n' ;
     testResults_append(results, {method, actual, expected });
+  }
+
+  return { results }
+}
+
+// ------------------------------ test_ifs_upload --------------------
+// upload file from PC to IFS.
+async function test_ifs_upload()  
+{
+  const results = testResults_new();
+  const connectSettings = test_connectSettings_new();
+  let tempFilePath = '' ;
+  const textData = `added 1 package from 1 contributor and audited 16 packages in 0.778s`;
+
+  // create a temporary file. write 
+  {
+    const tempTestDir = path.join(os.tmpdir(), 'sr_ibmi_common');
+    const { created, errmsg } = await dir_ensureExists(tempTestDir);
+
+    tempFilePath = path.join( tempTestDir, 'steve25.txt') ;
+    await file_writeNew( tempFilePath, textData ) ;
+  }
+
+  // ibmi_ifs_uploadFile
+  {
+    const method = 'ibmi_ifs_uploadFile';
+    let passText = '';
+    let errmsg = '';
+    const ifsFilePath = '/home/srichter/steve25.txt';
+    const { mtime, size } = await ibmi_ifs_uploadFile( tempFilePath, ifsFilePath, connectSettings);
+    const actual = size ;
+    const expected = textData.length ;
+
+    testResults_append(results, { method, actual, expected });
   }
 
   return { results }

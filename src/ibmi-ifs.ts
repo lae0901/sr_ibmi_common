@@ -1,10 +1,12 @@
 // /src/ibmi-ifs.ts
 
-import { object_toQueryString, path_joinUnix } from 'sr_core_ts';
+import { file_readFile, object_toQueryString, path_joinUnix } from 'sr_core_ts';
 import axios from 'axios';
 import { iConnectSettings, sqlTimestamp_toJavascriptDate } from './ibmi-common';
 import * as FormData from 'form-data';
+import * as path from 'path' ;
 import { connectionSettings_toProductConnectLibl, form_getLength } from './common_core';
+import { base64Builder_append, base64Builder_final, base64Builder_new } from 'sr_base64';
 
 // ----------------------------------- iIfsItem -----------------------------------
 export interface iIfsItem
@@ -111,6 +113,40 @@ export async function ibmi_ifs_getFileContents( filePath:string,
   }
 
   return {buf,errmsg};
+}
+
+// ----------------------- ibmi_ifs_uploadFile ----------------------------
+// returnType: buf, text
+export async function ibmi_ifs_uploadFile(filePath: string, ifsFilePath:string,
+                            connectSettings: iConnectSettings)
+{
+  let afterUpload_mtime = 0 ;
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/upload-to-ifs.php`;
+
+  // read entire contents of file to upload.
+  const { data } = await file_readFile(filePath);
+
+  // convert data Buffer to base64
+  const builder = base64Builder_new();
+  base64Builder_append(builder, data);
+  const base64_text = base64Builder_final(builder);
+
+  const form = new FormData();
+  form.append('field', base64_text, path.basename(ifsFilePath));
+  form.append('folder', path.dirname(ifsFilePath));
+
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
+
+  const result = await axios.post(
+    url, form,
+    { headers, });
+  const { mtime, size } = result.data as { mtime: number, size:number };
+  afterUpload_mtime = mtime ;
+
+  return { mtime:afterUpload_mtime, size } ;
 }
 
 // -------------------------------- ibmi_ifs_unlink --------------------------------
