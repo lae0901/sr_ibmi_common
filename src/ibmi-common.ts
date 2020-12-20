@@ -6,7 +6,10 @@ import axios from 'axios';
 import {  iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink,
           ibmi_ifs_deleteDir, ibmi_ifs_ensureDir, ibmi_ifs_checkDir } from './ibmi-ifs';
 import { connectionSettings_toProductConnectLibl, form_getLength } from './common_core';
+import { iQualSrcmbr } from './ibmi-interfaces';
+import * as FormData from 'form-data';
 
+export { iQualSrcmbr } ;
 export { iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink, 
         ibmi_ifs_deleteDir, ibmi_ifs_ensureDir, ibmi_ifs_checkDir } ;
 export { form_getLength } ;
@@ -517,69 +520,61 @@ export function sqlTimestamp_toJavascriptDate( sql_ts:string ) : Date
   return dt ;
 }
 
-// ----------------------------- saveFile_writeSrcmbr -----------------------------
-export function saveFile_writeSrcmbr(connectSettings: iConnectSettings,
-  folderContent: iMemberMetaItem,
-  srcmbr_lines: iSrcmbrLine[], save_filePath: string,
-  tags?: iSrcmbrDoc): Promise<void>
+// ----------------------------- as400_uploadLinesToSrcmbr -----------------------------
+/**
+ * upload an array of `iSrcmbrLine` lines to a srcmbr on the ibm i. If the srcmbr does
+ * not exist, it will be added to the source file. If the srcmbr does exist, its contents
+ * will be cleared and replaced with the uploaded lines.
+ * @param connectSettings 
+ * @param srcmbr_lines 
+ * @param uploadFileName name of that contains the srcmbr_lines. This is for info 
+ * purposes only. Can be set to an empty string.
+ * @param toSrcmbr 
+ * @param srcType 
+ * @param textDesc 
+ */
+export async function as400_uploadLinesToSrcmbr(connectSettings: iConnectSettings,
+  srcmbr_lines: iSrcmbrLine[], uploadFileName: string,
+  toSrcmbr: iQualSrcmbr, srcType:string, textDesc:string )
 {
-  const promise = new Promise<void>(async (resolve, reject) =>
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+
+  // convert from array of lines to array of srcmbr formatted lines.
+  // ( formatted such that text stream first contains name, srcfName, srcType,
+  //   textdesc. Then contains source lines. )
+  const uploadStream_lines = [];
+  uploadStream_lines.push(`srcfName:${toSrcmbr.srcfName}`);
+  uploadStream_lines.push(`srcfLib:${toSrcmbr.srcfLib}`);
+  uploadStream_lines.push(`mbrName:${toSrcmbr.mbrName}`);
+  uploadStream_lines.push(`srcType:${srcType}`);
+  uploadStream_lines.push(`textDesc:${textDesc}`);
+  uploadStream_lines.push(`lines:`);
+  const formattedLines = srcmbr_lines.map((item) =>
   {
-    let { srcfName, srcfLib, srcmbr, srcType, textDesc } = folderContent;
-    const save_parts = path.parse(save_filePath);
-    const save_fileName = save_parts.base;
-
-    // apply jsdoc_srcmbrDoc settings of the srcmbr file. 
-    // ( see the jsdoc_srcmbrDoc function in sr_parse_ts. also, the 
-    //   srcfMirror_registerCompletionProvider. )
-    if (tags)
-    {
-      srcmbr = tags.mbrName ? tags.mbrName : srcmbr;
-      srcType = tags.srcType ? tags.srcType : srcType;
-      textDesc = tags.textDesc ? tags.textDesc : textDesc;
-    }
-
-    // convert from array of lines to array of srcmbr formatted lines.
-    // ( formatted such that text stream first contains name, srcfName, srcType,
-    //   textdesc. Then contains source lines. )
-    const uploadStream_lines = [];
-    uploadStream_lines.push(`srcfName:${srcfName}`);
-    uploadStream_lines.push(`srcfLib:${srcfLib}`);
-    uploadStream_lines.push(`srcmbr:${srcmbr}`);
-    uploadStream_lines.push(`srcType:${srcType}`);
-    uploadStream_lines.push(`textDesc:${textDesc}`);
-    uploadStream_lines.push(`lines:`);
-    const formattedLines = srcmbr_lines.map((item) =>
-    {
-      const textLine = `${item.CHGDATE || '0000-00-00'},${item.SEQNBR},${item.TEXT}`;
-      return textLine;
-    });
-    uploadStream_lines.push(...formattedLines);
-    const sourceLines_text = uploadStream_lines.join('\n') + '\n';
-
-    const encoder = new TextEncoder();
-    const uint8array = encoder.encode(sourceLines_text);
-    const data = Buffer.from(uint8array);
-
-    const form = new FormData();
-    // Second argument  can take Buffer or Stream (lazily read during the request) too.
-    // Third argument is filename if you want to simulate a file upload. Otherwise omit.
-    form.append('field', data, save_fileName);
-    form.append('srcmbr', srcmbr);
-    form.append('srcfName', srcfName);
-    form.append('srcfLib', srcfLib);
-    form.append('libl', 'COURI7 aplusb1fcc qtemp');
-
-    const headers = form.getHeaders();
-    headers['Content-length'] = await form_getLength(form);
-
-    const serverUrl = await rock_getServerUrl();
-    axios.post(`${serverUrl}/site/common/json_uploadSrcmbr.php`, form, {
-      headers,
-    }).then(result =>
-    {
-      resolve();
-    });
+    const textLine = `${item.CHGDATE || '0000-00-00'},${item.SEQNBR},${item.TEXT}`;
+    return textLine;
   });
-  return promise;
+  uploadStream_lines.push(...formattedLines);
+  const sourceLines_text = uploadStream_lines.join('\n') + '\n';
+
+  const encoder = new TextEncoder();
+  const uint8array = encoder.encode(sourceLines_text);
+  const data = Buffer.from(uint8array);
+
+  const form = new FormData();
+  // Second argument  can take Buffer or Stream (lazily read during the request) too.
+  // Third argument is filename if you want to simulate a file upload. Otherwise omit.
+  form.append('field', data, uploadFileName || toSrcmbr.mbrName );
+  form.append('mbrName', toSrcmbr.mbrName);
+  form.append('srcfName', toSrcmbr.srcfName);
+  form.append('srcfLib', toSrcmbr.srcfLib);
+  form.append('libl', libl );
+
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
+
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/json_uploadSrcmbr.php`;
+  const result = await axios.post( url, form, { headers });
+  return result.data as string ;
 }

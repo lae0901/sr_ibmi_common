@@ -10,6 +10,7 @@
 * iSrcmbrLine[] = await as400_srcmbrLines( lib, file, srcmbr )
 * iDspfd_mbrlist[] = await as400_srcmbrList( lib, file, srcmbr )
 * iDspffd[] = await as400_dspffd( lib, file, iServerOptions )
+* await as400_uploadLinesToSrcmbr(connectSettings, srcmbr_lines, uploadFileName, toSrcmbr, srcType, textDesc )
 
 ## ibm i ifs functions
 * iIfsItem[] = await ibmi_ifs_getItems( dirPath, connectSettings, filter_itemType )

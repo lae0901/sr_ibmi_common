@@ -1,12 +1,13 @@
 import { system_downloadsFolder, object_toQueryString, string_rtrim, 
-        string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll, dir_mkdir, dir_ensureExists, file_writeText } from 'sr_core_ts';
+        string_matchGeneric, file_writeNew, string_assignSubstr, string_replaceAll, dir_mkdir, dir_ensureExists, file_writeText, dir_rmdir } from 'sr_core_ts';
 import axios from 'axios';
-import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd, iConnectSettings } from '../ibmi-common';
+import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, as400_chgpfm, iServerOptions, as400_dspffd, iConnectSettings, iSrcmbrLine, as400_uploadLinesToSrcmbr } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir, ibmi_ifs_uploadFile } from '../ibmi-ifs';
 import path = require('path');
 import * as fs from 'fs' ;
 import * as os from 'os' ;
+import { iQualSrcmbr } from '../ibmi-interfaces';
 
 // run main function that is declared as async. 
 async_main();
@@ -138,30 +139,48 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   const connectSettings = test_connectSettings_new();
 
   let method = '';
-  let fileName = 'STEVESRC';
-  let libName = 'glide';
+  let srcfName = 'STEVESRC';
+  let srcfLib = 'glide';
   let mbrName = 'BATLABR';
+  let batlabr_lines: iSrcmbrLine[] = [] ;
 
   // as400_srcmbrLines 
   {
     method = 'as400_srcmbrLines';
     const desc = `read srcmbr lines from ${mbrName}`;
     const expected = 235;
-    const lines = await as400_srcmbrLines( libName, fileName, mbrName, connectSettings);
+    const lines = await as400_srcmbrLines( srcfLib, srcfName, mbrName, connectSettings);
     const testResult = typeof lines == 'string' ? lines : lines.length ;
+    batlabr_lines = lines ;
 
     testResults_append(results, { desc, method, expected, testResult });
   }
 
+  // as400_uploadLinesToSrcmbr
+  {
+    method = 'as400_uploadLinesToSrcmbr' ;
+    const uploadFileName = 'batlabr' ;
+    const toMbrName = 'TOBATLABR' ;
+    const qualSrcmbr : iQualSrcmbr = {srcfName, srcfLib, mbrName: toMbrName } ;
+    const srcType = 'RPGLE' ;
+    const textDesc = 'print labels' ;
+    const expected = `file ${uploadFileName} received and moved to mbrName ${toMbrName} fileType:`;
+    const full_actual = await as400_uploadLinesToSrcmbr( 
+          connectSettings, batlabr_lines, uploadFileName, qualSrcmbr, 
+          srcType, textDesc );
+    const actual = full_actual.substr(0, expected.length) ;
+    testResults_append(results, { method, expected, actual });
+  }
+
   // as400_srcmbrList  
   {
-    let fileName = 'steveSRC' ;
+    let srcfName = 'steveSRC' ;
     let mbrName = 'bom*' ;
-    const mbrList = await as400_srcmbrList(libName, fileName, mbrName, connectSettings);
+    const mbrList = await as400_srcmbrList(srcfLib, srcfName, mbrName, connectSettings);
     method = 'as400_srcmbrList';
 
     {
-      const desc = `read generic list of members ${mbrName} source file ${fileName}`;
+      const desc = `read generic list of members ${mbrName} source file ${srcfName}`;
       let aspect = 'generic member list' ;
       const expected = 4 ;
       const testResult = mbrList.length ;
@@ -194,7 +213,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   let orig_srcType = '' ;
   let orig_mbrText = '' ;
   {
-    const mbrList = await as400_srcmbrList(libName, fileName, mbrName, connectSettings);
+    const mbrList = await as400_srcmbrList(srcfLib, srcfName, mbrName, connectSettings);
     orig_srcType = mbrList[0].SRCTYPE;
     orig_mbrText = mbrList[0].MBRTEXT;
   }
@@ -206,7 +225,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
     method = 'as400_chgpfm';
     const desc = `change srctype and text description of ${mbrName}`;
     const expected = 'successful';
-    const {errmsg} = await as400_chgpfm(fileName, libName, mbrName, chg_mbrText, chg_srcType,
+    const {errmsg} = await as400_chgpfm(srcfName, srcfLib, mbrName, chg_mbrText, chg_srcType,
                   connectSettings);
     const testResult = errmsg ? errmsg : 'successful';
     testResults_append(results, { desc, method, expected, testResult });
@@ -216,7 +235,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
   let cur_srcType = '';
   let cur_mbrText = '';
   {
-    const mbrList = await as400_srcmbrList(libName, fileName, mbrName, connectSettings);
+    const mbrList = await as400_srcmbrList(srcfLib, srcfName, mbrName, connectSettings);
     cur_srcType = mbrList[0].SRCTYPE;
     cur_mbrText = mbrList[0].MBRTEXT;
   }
@@ -236,7 +255,7 @@ async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
     const aspect = 'restore srctype' ;
     const desc = 'change srctype and mbrText back to original values' ;
     const expected = orig_srcType + orig_mbrText;
-    const { errmsg } = await as400_chgpfm(fileName, libName, mbrName, orig_mbrText, orig_srcType, 
+    const { errmsg } = await as400_chgpfm(srcfName, srcfLib, mbrName, orig_mbrText, orig_srcType, 
                             connectSettings );
     const testResult = errmsg ? errmsg : orig_srcType + orig_mbrText;
     testResults_append(results, { desc, method, expected, testResult });
@@ -277,13 +296,13 @@ async function ifs_ibmi_test()
 
   // ibmi_ifs_unlink
   {
-    const { results: res } = await test_ifs_unlink( ) ;
+    const res = await test_ifs_unlink( ) ;
     results.push(...res);
   }
 
   // test ifs directory functions.
   {
-    const { results: res } = await test_ifs_dir();
+    const res = await test_ifs_dir();
     results.push(...res);
   }
 
@@ -315,7 +334,7 @@ async function test_ifs_getItems()
       dirPath, connectSettings, {});
     ifsItems = rows ;
     const actual = { numRows:rows.length, errText } ;
-    const expected = { numRows: 65, errText:''} ;
+    const expected = { numRows: 66, errText:''} ;
     const desc = `get items from folder ${dirPath}`;
     testResults_append(results, { method, desc, expected, actual });
   }
@@ -468,27 +487,49 @@ async function test_ifs_dir()
     testResults_append(results, { method, actual, expected });
   }
 
-  return { results }
+  return results;
 }
 
 // ------------------------------ test_ifs_unlink --------------------
 // add and remove member from file.
 async function test_ifs_unlink() 
 {
+  let tempFilePath = '';
+  let tempTestDir = '';
+  const ifsFilePath = '/home/srichter/steve26.txt';
+  const textData = `added 1 package from 1 contributor and audited 16 packages in 0.778s`;
   const results = testResults_new();
   let method = '';
   const connectSettings = test_connectSettings_new();
 
+  // create a temporary file. write 
+  {
+    tempTestDir = path.join(os.tmpdir(), 'sr_ibmi_common');
+    const { created, errmsg } = await dir_ensureExists(tempTestDir);
+
+    tempFilePath = path.join(tempTestDir, 'steve25.txt');
+    await file_writeNew(tempFilePath, textData);
+  }
+
+  // upload temporary text file to IFS.
+  {
+    await ibmi_ifs_uploadFile(tempFilePath, ifsFilePath, connectSettings);
+  }
+
   // ibmi_ifs_unlink
   {
     method = 'ibmi_ifs_unlink';
-    const ifsFilePath = '/www/zendphp7/htdocs/autocoder/tester/steve.txt';
     const actual = await ibmi_ifs_unlink(ifsFilePath, connectSettings);
-    const expected = 'file /www/zendphp7/htdocs/autocoder/tester/steve.txt deleted\n' ;
+    const expected = `file ${ifsFilePath} deleted\n` ;
     testResults_append(results, {method, actual, expected });
   }
 
-  return { results }
+  // delete the temporary dir and its contents.
+  {
+    await dir_rmdir(tempTestDir, { recursive: true });
+  }
+
+  return results;
 }
 
 // ------------------------------ test_ifs_upload --------------------
@@ -498,11 +539,12 @@ async function test_ifs_upload()
   const results = testResults_new();
   const connectSettings = test_connectSettings_new();
   let tempFilePath = '' ;
+  let tempTestDir = '' ;
   const textData = `added 1 package from 1 contributor and audited 16 packages in 0.778s`;
 
   // create a temporary file. write 
   {
-    const tempTestDir = path.join(os.tmpdir(), 'sr_ibmi_common');
+    tempTestDir = path.join(os.tmpdir(), 'sr_ibmi_common');
     const { created, errmsg } = await dir_ensureExists(tempTestDir);
 
     tempFilePath = path.join( tempTestDir, 'steve25.txt') ;
@@ -520,6 +562,11 @@ async function test_ifs_upload()
     const expected = textData.length ;
 
     testResults_append(results, { method, actual, expected });
+  }
+
+  // delete the temporary dir and its contents.
+  {
+    await dir_rmdir( tempTestDir, {recursive:true}) ;
   }
 
   return { results }
