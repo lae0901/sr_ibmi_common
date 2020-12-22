@@ -14,6 +14,9 @@ export { iIfsItem, ibmi_ifs_getItems, ibmi_ifs_getFileContents, ibmi_ifs_unlink,
         ibmi_ifs_deleteDir, ibmi_ifs_ensureDir, ibmi_ifs_checkDir } ;
 export { form_getLength } ;
 
+export * from './common-typedef';
+export * from './rpg-typedef';
+
 export interface iDspfd_mbrlist
 {
   FILENAME: string,
