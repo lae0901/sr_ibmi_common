@@ -72,12 +72,50 @@ export interface iServerOptions
   joblog?: 'Y' | 'N'
 }
 
+// ------------------------------- iConnectSetting -------------------------------
+/**
+ * connect to ibm i settings. system library name. Then, once user is logged in, 
+ * the login user name, current library ( in which new objects are created ), and
+ * user library list ( where to find database files and source code of the logged
+ * in user. )
+ */
+export interface iConnectSetting
+{
+  /**
+   * name of this connection. A list of connection settings are stored in 
+   */
+  connectName: string;
+
+  /**
+   * url of ibm i server.
+   */
+  serverUrl: string;
+
+  /**
+   * ibm i library that contains autocoder product programs. For example, see ibmi_ifs_getItems
+   * function. That function calls an sql table function on ibm i that returns items from
+   * ifs folder. That sql table function is found in the autocoder product library.
+   */
+  ibmi_autocoder_product_lib: string;
+
+  /**
+   * ibm i ifs folder use by autocoder web services. This ifs_folder path is joined to 
+   * serverUrl to form root URL of the autocoder product web service.
+   */
+  autocoder_ifs_product_folder: string;
+
+  ibmi_connect_curlib: string;
+
+  ibmi_connect_libl: string;
+}
+
 // ------------------------------- iConnectSettings -------------------------------
 /**
  * connect to ibm i settings. system library name. Then, once user is logged in, 
  * the login user name, current library ( in which new objects are created ), and
  * user library list ( where to find database files and source code of the logged
  * in user. )
+ * @deprecated use `iConnectSetting` instead.
  */
 export interface iConnectSettings
 {
