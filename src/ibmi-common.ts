@@ -196,7 +196,7 @@ export interface iSrcfMirror
 export async function as400_addpfm(
   fileName: string, libName: string, mbrName: string, 
   textDesc: string, srcType: string, 
-  connectSettings: iConnectSettings, options?: iServerOptions )
+  connectSettings: iConnectSetting, options?: iServerOptions )
 {
   fileName = fileName || '';
   libName = libName || '';
@@ -230,7 +230,7 @@ export async function as400_addpfm(
 export async function as400_chgpfm(
   fileName: string, libName: string, mbrName: string,
   textDesc: string, srcType: string, 
-  connectSettings: iConnectSettings, options?: iServerOptions )
+  connectSettings: iConnectSetting, options?: iServerOptions )
 {
   fileName = fileName || '';
   libName = libName || '';
@@ -263,7 +263,7 @@ export async function as400_chgpfm(
 // --------------------- as400_compile -----------------------
 export async function as400_compile( srcfName:string, srcfLib:string, 
             srcmbr:string, 
-            connectSettings: iConnectSettings, options?: iServerOptions)
+            connectSettings: iConnectSetting, options?: iServerOptions)
 {
   srcfName = srcfName || '';
   srcfLib = srcfLib || '';
@@ -300,7 +300,7 @@ export async function as400_compile( srcfName:string, srcfLib:string,
 // --------------------- as400_dspffd -----------------------
 // return array of srcmbrs of a srcfile.
 export async function as400_dspffd(libName: string, fileName: string,
-  connectSettings: iConnectSettings, options?: iServerOptions)
+  connectSettings: iConnectSetting, options?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -334,7 +334,7 @@ export async function as400_dspffd(libName: string, fileName: string,
 // --------------------- as400_rmvm -----------------------
 export async function as400_rmvm(
   fileName: string, libName: string, mbrName: string,
-  connectSettings: iConnectSettings, options ?: iServerOptions)
+  connectSettings: iConnectSetting, options ?: iServerOptions)
 {
   fileName = fileName || '';
   libName = libName || '';
@@ -366,7 +366,7 @@ export async function as400_rmvm(
 
 // --------------------- as400_srcfList -----------------------
 export async function as400_srcfList(objName: string, libName: string,  
-                connectSettings: iConnectSettings, options ?: iServerOptions)
+                connectSettings: iConnectSetting, options ?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -390,7 +390,7 @@ export async function as400_srcfList(objName: string, libName: string,
 
 // --------------------- as400_routines -----------------------
 export async function as400_routines(libName: string, routineName: string, 
-                connectSettings: iConnectSettings, options ?: iServerOptions)
+                connectSettings: iConnectSetting, options ?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -416,7 +416,7 @@ export async function as400_routines(libName: string, routineName: string,
 // --------------------- as400_srcmbrLines -----------------------
 export async function as400_srcmbrLines(libName: string, fileName: string, 
                   mbrName: string,
-                  connectSettings: iConnectSettings, options ?: iServerOptions)
+                  connectSettings: iConnectSetting, options ?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -479,7 +479,7 @@ function respText_extractErrorText(respText:string)
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.
 export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string, 
-  connectSettings: iConnectSettings, options?: iServerOptions)
+  connectSettings: iConnectSetting, options?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -520,7 +520,7 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
 
 // --------------------- as400_tablesAndViews_select -----------------------
 export async function as400_tablesAndViews_select(schema: string, collName: string, 
-                connectSettings: iConnectSettings, options?: iServerOptions)
+                connectSettings: iConnectSetting, options?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -574,7 +574,7 @@ export function sqlTimestamp_toJavascriptDate( sql_ts:string ) : Date
  * @param srcType 
  * @param textDesc 
  */
-export async function as400_uploadLinesToSrcmbr(connectSettings: iConnectSettings,
+export async function as400_uploadLinesToSrcmbr(connectSettings: iConnectSetting,
   srcmbr_lines: iSrcmbrLine[], uploadFileName: string,
   toSrcmbr: iQualSrcmbr, srcType:string, textDesc:string )
 {
