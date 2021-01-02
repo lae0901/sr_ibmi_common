@@ -3,7 +3,7 @@ import { system_downloadsFolder, object_toQueryString, string_rtrim,
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, 
         as400_chgpfm, iServerOptions, as400_dspffd, 
-        iConnectSetting, iSrcmbrLine, as400_uploadLinesToSrcmbr } from '../ibmi-common';
+        iConnectSettings, iSrcmbrLine, as400_uploadLinesToSrcmbr } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir, ibmi_ifs_uploadFile } from '../ibmi-ifs';
 import path = require('path');
@@ -55,8 +55,8 @@ async function async_main()
 // --------------------------- test_connectSettings_new ---------------------------
 function test_connectSettings_new( )
 {
-  const connectSettings: iConnectSetting = {
-    serverUrl: 'http://173.54.20.170:10080', connectName:'',
+  const connectSettings: iConnectSettings = {
+    serverUrl: 'http://173.54.20.170:10080', connectName:'office',
     ibmi_autocoder_product_lib: 'autocoder', autocoder_ifs_product_folder: 'srichter/autocoder',
     ibmi_connect_curlib: 'glide', ibmi_connect_libl: 'glide'
   };

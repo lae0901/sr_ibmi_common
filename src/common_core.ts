@@ -1,6 +1,6 @@
 import * as FormData from 'form-data';
 import { stringArr_toDistinct } from 'sr_core_ts';
-import { iConnectSetting } from './ibmi-common';
+import { iConnectSettings } from './ibmi-common';
 
 // -------------------------------- form_getLength --------------------------------
 export function form_getLength(form: FormData)
@@ -19,7 +19,7 @@ export function form_getLength(form: FormData)
  * build library list from product_lib and connect libraries from connectSettings.
  * @param connectSettings 
  */
-export function connectionSettings_toProductConnectLibl(connectSettings: iConnectSetting)
+export function connectionSettings_toProductConnectLibl(connectSettings: iConnectSettings)
 {
   const { ibmi_autocoder_product_lib, ibmi_connect_curlib, ibmi_connect_libl } = connectSettings;
   const libl = `${ibmi_autocoder_product_lib} ${ibmi_connect_curlib} ${ibmi_connect_libl}`;

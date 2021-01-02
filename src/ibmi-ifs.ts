@@ -2,7 +2,7 @@
 
 import { file_readFile, object_toQueryString, path_joinUnix } from 'sr_core_ts';
 import axios from 'axios';
-import { iConnectSetting, sqlTimestamp_toJavascriptDate } from './ibmi-common';
+import { iConnectSettings, sqlTimestamp_toJavascriptDate } from './ibmi-common';
 import * as FormData from 'form-data';
 import * as path from 'path' ;
 import { connectionSettings_toProductConnectLibl, form_getLength } from './common_core';
@@ -24,7 +24,7 @@ export interface iIfsItem
 // --------------------- ibmi_ifs_getItems -----------------------
 // options:{filterItemName:string, filterItemType:string, joblog:'N'}
 export async function ibmi_ifs_getItems( 
-  dirPath: string, connectSettings: iConnectSetting,
+  dirPath: string, connectSettings: iConnectSettings,
   options?:{filterItemName?:string, filterItemType?:string, joblog?:'Y'|'N', debug?:'Y'|'N'} )
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
@@ -82,7 +82,7 @@ export async function ibmi_ifs_getItems(
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text
 export async function ibmi_ifs_getFileContents( filePath:string, 
-            connectSettings: iConnectSetting, returnType = 'buf')
+            connectSettings: iConnectSettings, returnType = 'buf')
 {
   let ifsFilePath = filePath ;
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
@@ -118,7 +118,7 @@ export async function ibmi_ifs_getFileContents( filePath:string,
 // ----------------------- ibmi_ifs_uploadFile ----------------------------
 // returnType: buf, text
 export async function ibmi_ifs_uploadFile(filePath: string, ifsFilePath:string,
-                            connectSettings: iConnectSetting)
+                            connectSettings: iConnectSettings)
 {
   let afterUpload_mtime = 0 ;
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
@@ -155,7 +155,7 @@ export async function ibmi_ifs_uploadFile(filePath: string, ifsFilePath:string,
  * @param serverUrl server url
  * @param ifsFilePath path of file on IFS to delete
  */
-export async function ibmi_ifs_unlink(ifsFilePath: string, connectSettings: iConnectSetting )
+export async function ibmi_ifs_unlink(ifsFilePath: string, connectSettings: iConnectSettings )
 {
   const serverUrl = connectSettings.serverUrl;
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/delete-ifs.php`;
@@ -184,7 +184,7 @@ export async function ibmi_ifs_unlink(ifsFilePath: string, connectSettings: iCon
  * @param serverUrl server url
  * @param ifsDirPath path of IFS directory to delete
  */
-export async function ibmi_ifs_deleteDir(ifsDirPath: string, connectSettings: iConnectSetting)
+export async function ibmi_ifs_deleteDir(ifsDirPath: string, connectSettings: iConnectSettings)
 {
   const serverUrl = connectSettings.serverUrl;
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;
@@ -214,7 +214,7 @@ export async function ibmi_ifs_deleteDir(ifsDirPath: string, connectSettings: iC
  * @param serverUrl server url
  * @param ifsDirPath path of IFS directory to ensure exists
  */
-export async function ibmi_ifs_ensureDir(ifsDirPath: string, connectSettings:iConnectSetting)
+export async function ibmi_ifs_ensureDir(ifsDirPath: string, connectSettings:iConnectSettings)
 {
   const serverUrl = connectSettings.serverUrl;
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;
@@ -244,7 +244,7 @@ export async function ibmi_ifs_ensureDir(ifsDirPath: string, connectSettings:iCo
  * @param ifsDirPath path of IFS directory to ensure exists
  * @returns exists or not_exists
  */
-export async function ibmi_ifs_checkDir(ifsDirPath: string, connectSettings: iConnectSetting )
+export async function ibmi_ifs_checkDir(ifsDirPath: string, connectSettings: iConnectSettings )
 {
   const serverUrl = connectSettings.serverUrl;
   const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-action.php`;

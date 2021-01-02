@@ -72,14 +72,14 @@ export interface iServerOptions
   joblog?: 'Y' | 'N'
 }
 
-// ------------------------------- iConnectSetting -------------------------------
+// ------------------------------- iConnectSettings -------------------------------
 /**
  * connect to ibm i settings. system library name. Then, once user is logged in, 
  * the login user name, current library ( in which new objects are created ), and
  * user library list ( where to find database files and source code of the logged
  * in user. )
  */
-export interface iConnectSetting
+export interface iConnectSettings
 {
   /**
    * name of this connection. A list of connection settings are stored in 
@@ -102,41 +102,6 @@ export interface iConnectSetting
    * ibm i ifs folder use by autocoder web services. This ifs_folder path is joined to 
    * serverUrl to form root URL of the autocoder product web service.
    */
-  autocoder_ifs_product_folder: string;
-
-  ibmi_connect_curlib: string;
-
-  ibmi_connect_libl: string;
-}
-
-// ------------------------------- iConnectSettings -------------------------------
-/**
- * connect to ibm i settings. system library name. Then, once user is logged in, 
- * the login user name, current library ( in which new objects are created ), and
- * user library list ( where to find database files and source code of the logged
- * in user. )
- * @deprecated use `iConnectSetting` instead.
- */
-export interface iConnectSettings
-{
-  /**
-   * url of ibm i server.
-   */
-  serverUrl: string;
-
-  /**
-   * ibm i library that contains autocoder product programs. For example, see ibmi_ifs_getItems
-   * function. That function calls an sql table function on ibm i that returns items from
-   * ifs folder. That sql table function is found in the autocoder product library.
-   */
-  ibmi_autocoder_lib?: string;
-  ibmi_autocoder_product_lib: string;
-
-  /**
-   * ibm i ifs folder use by autocoder web services. This ifs_folder path is joined to 
-   * serverUrl to form root URL of the autocoder product web service.
-   */
-  autocoder_ifs_folder?: string;
   autocoder_ifs_product_folder: string;
 
   ibmi_connect_curlib: string;
@@ -196,7 +161,7 @@ export interface iSrcfMirror
 export async function as400_addpfm(
   fileName: string, libName: string, mbrName: string, 
   textDesc: string, srcType: string, 
-  connectSettings: iConnectSetting, options?: iServerOptions )
+  connectSettings: iConnectSettings, options?: iServerOptions )
 {
   fileName = fileName || '';
   libName = libName || '';
@@ -230,7 +195,7 @@ export async function as400_addpfm(
 export async function as400_chgpfm(
   fileName: string, libName: string, mbrName: string,
   textDesc: string, srcType: string, 
-  connectSettings: iConnectSetting, options?: iServerOptions )
+  connectSettings: iConnectSettings, options?: iServerOptions )
 {
   fileName = fileName || '';
   libName = libName || '';
@@ -263,7 +228,7 @@ export async function as400_chgpfm(
 // --------------------- as400_compile -----------------------
 export async function as400_compile( srcfName:string, srcfLib:string, 
             srcmbr:string, 
-            connectSettings: iConnectSetting, options?: iServerOptions)
+            connectSettings: iConnectSettings, options?: iServerOptions)
 {
   srcfName = srcfName || '';
   srcfLib = srcfLib || '';
@@ -300,7 +265,7 @@ export async function as400_compile( srcfName:string, srcfLib:string,
 // --------------------- as400_dspffd -----------------------
 // return array of srcmbrs of a srcfile.
 export async function as400_dspffd(libName: string, fileName: string,
-  connectSettings: iConnectSetting, options?: iServerOptions)
+  connectSettings: iConnectSettings, options?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -334,7 +299,7 @@ export async function as400_dspffd(libName: string, fileName: string,
 // --------------------- as400_rmvm -----------------------
 export async function as400_rmvm(
   fileName: string, libName: string, mbrName: string,
-  connectSettings: iConnectSetting, options ?: iServerOptions)
+  connectSettings: iConnectSettings, options ?: iServerOptions)
 {
   fileName = fileName || '';
   libName = libName || '';
@@ -366,7 +331,7 @@ export async function as400_rmvm(
 
 // --------------------- as400_srcfList -----------------------
 export async function as400_srcfList(objName: string, libName: string,  
-                connectSettings: iConnectSetting, options ?: iServerOptions)
+                connectSettings: iConnectSettings, options ?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -390,7 +355,7 @@ export async function as400_srcfList(objName: string, libName: string,
 
 // --------------------- as400_routines -----------------------
 export async function as400_routines(libName: string, routineName: string, 
-                connectSettings: iConnectSetting, options ?: iServerOptions)
+                connectSettings: iConnectSettings, options ?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -416,7 +381,7 @@ export async function as400_routines(libName: string, routineName: string,
 // --------------------- as400_srcmbrLines -----------------------
 export async function as400_srcmbrLines(libName: string, fileName: string, 
                   mbrName: string,
-                  connectSettings: iConnectSetting, options ?: iServerOptions)
+                  connectSettings: iConnectSettings, options ?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -479,7 +444,7 @@ function respText_extractErrorText(respText:string)
 // --------------------- as400_srcmbrList -----------------------
 // return array of srcmbrs of a srcfile.
 export async function as400_srcmbrList(libName: string, fileName: string, mbrName: string, 
-  connectSettings: iConnectSetting, options?: iServerOptions)
+  connectSettings: iConnectSettings, options?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -520,7 +485,7 @@ export async function as400_srcmbrList(libName: string, fileName: string, mbrNam
 
 // --------------------- as400_tablesAndViews_select -----------------------
 export async function as400_tablesAndViews_select(schema: string, collName: string, 
-                connectSettings: iConnectSetting, options?: iServerOptions)
+                connectSettings: iConnectSettings, options?: iServerOptions)
 {
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
@@ -574,7 +539,7 @@ export function sqlTimestamp_toJavascriptDate( sql_ts:string ) : Date
  * @param srcType 
  * @param textDesc 
  */
-export async function as400_uploadLinesToSrcmbr(connectSettings: iConnectSetting,
+export async function as400_uploadLinesToSrcmbr(connectSettings: iConnectSettings,
   srcmbr_lines: iSrcmbrLine[], uploadFileName: string,
   toSrcmbr: iQualSrcmbr, srcType:string, textDesc:string )
 {
