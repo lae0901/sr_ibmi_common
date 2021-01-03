@@ -140,6 +140,21 @@ export interface iSrcmbrXref
   srcf_is_master?: boolean;
 }
 
+// -------------------------------- iIfsMirrorJson --------------------------------
+export interface iIfsMirrorJson
+{
+  ifsFolder: string;
+  master: string;
+  mirror_hold: boolean;
+  ibmi_url: string;
+  ignore?: string[];
+  ignore_not?: string[];
+
+  // connection name to use when connecting to ibm i.
+  // see iConnnectSettings interface and setConnectSettings command 
+  connectName?: string;
+}
+
 // ---------------------------------- iSrcfMirror ---------------------------------
 // structure of .srcf-mirror.json file.
 export interface iSrcfMirror
@@ -155,6 +170,10 @@ export interface iSrcfMirror
   // source file is the master. Files in the srcmbr folder are
   // removed if they do not exist as srcmbr in source file.
   srcf_is_master?: boolean;
+
+  // connection name to use when connecting to ibm i.
+  // see iConnnectSettings interface and setConnectSettings command 
+  connectName?: string;
 }
 
 // --------------------- as400_addpfm -----------------------
