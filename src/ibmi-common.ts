@@ -143,7 +143,10 @@ export interface iIfsMirrorJson
   ifsFolder: string;
   master: string;
   mirror_hold: boolean;
+
+  /** @deprecated use connectName instead. */
   ibmi_url: string;
+  
   ignore?: string[];
   ignore_not?: string[];
 
