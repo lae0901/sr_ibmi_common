@@ -13,6 +13,7 @@ export { form_getLength } ;
 export * from './common-typedef';
 export * from './rpg-typedef';
 export * from './ibmi-ifs' ;
+export * from './mirror-common';
 
 export interface iDspfd_mbrlist
 {

@@ -3,13 +3,14 @@ import { system_downloadsFolder, object_toQueryString, string_rtrim,
 import axios from 'axios';
 import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmbrList, 
         as400_chgpfm, iServerOptions, as400_dspffd, 
-        iConnectSettings, iSrcmbrLine, as400_uploadLinesToSrcmbr } from '../ibmi-common';
+        iConnectSettings, iSrcmbrLine, as400_uploadLinesToSrcmbr, iIfsMirrorJson } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
 import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir, ibmi_ifs_uploadFile } from '../ibmi-ifs';
 import path = require('path');
 import * as fs from 'fs' ;
 import * as os from 'os' ;
 import { iQualSrcmbr } from '../ibmi-interfaces';
+import { mirrorSettings_readJson } from '../mirror-common';
 
 // run main function that is declared as async. 
 async_main();
@@ -45,6 +46,12 @@ async function async_main()
   // dspffd tests
   {
     const { results: res } = await as400_dspffd_test();
+    results.push(...res);
+  }
+
+  // mirror json tests
+  {
+    const res = await mirrorJson_test();
     results.push(...res);
   }
 
@@ -452,6 +459,23 @@ async function ifs_ibmi_getFileContents_notFound()
   }
 
   return { results }
+}
+
+// -------------------------------- mirrorJson_test --------------------------------
+async function mirrorJson_test()
+{
+  const results = testResults_new();
+  const dirPath = '.\\src\\tests' ;
+
+  {
+    const method = 'mirrorSettings_readJson';
+    const mirror_json =  await mirrorSettings_readJson(dirPath, 'ifs' ) as iIfsMirrorJson ;
+    const actual = mirror_json.connectName ;
+    const expected = `office`;
+    testResults_append(results, { method, actual, expected });
+  }
+
+  return results;
 }
 
 // ------------------------------ test_ifs_dir --------------------

@@ -1,0 +1,11 @@
+{
+  "ifsFolder": "/www/zendphp7/htdocs/srichter",
+  "master": "ibm i",
+  "mirror_hold": false,
+  "ignore": [
+    "node_modules",
+    "lib"
+  ],
+  "ibmi-url": "http:\\192.168.1.170:10080",
+  "connectName": "office"
+}
