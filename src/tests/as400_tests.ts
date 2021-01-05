@@ -470,22 +470,15 @@ async function ifs_ibmi_getFileContents_notFound()
   // ibmi_ifs_getFileContents
   {
     method = 'ibmi_ifs_getFileContents';
-    let passText = '';
-    let errmsg = '';
+    const aspect = 'file not found' ;
     const filePath = '/home/srichter/abc xyz.pdf';  // file is not found.
-    const itemName = '';
-    const itemType = '';
-    const { buf, errmsg: errText } = await ibmi_ifs_getFileContents(filePath, connectSettings );
-    if (errText)
-    {
-      passText = `correctly detected file not found. file ${filePath}.`;
-    }
-    else
-    {
-      errmsg = `did not detect file not found error. File ${filePath}`;
-    }
+    const expected = `correctly detected file not found. file ${filePath}.`;
+    const { buf, errmsg } = await ibmi_ifs_getFileContents(filePath, connectSettings );
+    const actual = errmsg 
+                    ? `correctly detected file not found. file ${filePath}.`
+                    : `did not detect file not found error. File ${filePath}` ;
 
-    testResults_append(results, passText, errmsg, method);
+    testResults_append(results, { method, aspect, actual, expected }) ;
   }
 
   return { results }
