@@ -282,6 +282,36 @@ export async function as400_compile( srcfName:string, srcfLib:string,
   return { compMsg, compile, joblog:compile_joblog };
 }
 
+
+// ------------------------------- ibmi_documentRoot -------------------------------
+/**
+ * call common web service on the ibm i.  Return document root path of the web
+ * server.
+ * @param connectSettings 
+ */
+export async function ibmi_documentRoot(connectSettings: iConnectSettings)
+{
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/common/common-services.php`;
+  const opcode = 'documentRoot';
+
+  // post to ensure-ifs-dir.php on ibm i server to make sure directory exists.
+  const form = new FormData();
+  form.append('opcode', opcode);
+
+  let errmsg = '' ;
+  let documentRoot = '' ;
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
+  {
+    const result = await axios.post(url, form,
+      { headers });
+    ({errmsg, documentRoot} = result.data) ;
+  }
+
+  return { errmsg, documentRoot};
+}
+
 // --------------------- as400_dspffd -----------------------
 // return array of srcmbrs of a srcfile.
 export async function as400_dspffd(libName: string, fileName: string,
