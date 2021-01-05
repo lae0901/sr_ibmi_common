@@ -5,7 +5,7 @@ import { as400_compile, as400_addpfm, as400_rmvm, as400_srcmbrLines, as400_srcmb
         as400_chgpfm, iServerOptions, as400_dspffd, 
         iConnectSettings, iSrcmbrLine, as400_uploadLinesToSrcmbr, iIfsMirrorJson, ibmi_documentRoot } from '../ibmi-common';
 import { testResults_append,testResults_consoleLog,testResults_new,iTestResultItem } from 'sr_test_framework';
-import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir, ibmi_ifs_uploadFile } from '../ibmi-ifs';
+import { ibmi_ifs_getItems, ibmi_ifs_getFileContents, iIfsItem, ibmi_ifs_unlink, ibmi_ifs_checkDir, ibmi_ifs_ensureDir, ibmi_ifs_deleteDir, ibmi_ifs_uploadFile, ibmi_ifs_uploadTextToFile } from '../ibmi-ifs';
 import path = require('path');
 import * as fs from 'fs' ;
 import * as os from 'os' ;
@@ -345,6 +345,12 @@ async function ifs_ibmi_test()
     results.push(...res);
   }
 
+  // test_ifs_uploadText
+  {
+    const { results: res } = await test_ifs_uploadText();
+    results.push(...res);
+  }
+
   return { results }
 }
 
@@ -617,6 +623,44 @@ async function test_ifs_upload()
   // delete the temporary dir and its contents.
   {
     await dir_rmdir( tempTestDir, {recursive:true}) ;
+  }
+
+  return { results }
+}
+
+// ------------------------------ test_ifs_uploadText --------------------
+// upload file from PC to IFS.
+async function test_ifs_uploadText()  
+{
+  const results = testResults_new();
+  const connectSettings = test_connectSettings_new();
+  let tempFilePath = '';
+  let tempTestDir = '';
+
+  const { documentRoot } = await ibmi_documentRoot( connectSettings ) ;
+
+  // path to dummy-data.txt file in autocoder product folder within htdocs of zend server.
+  const productFolder = path.join( documentRoot, connectSettings.autocoder_ifs_product_folder ) ;
+  const testFolder = path.join( productFolder, 'php/test');
+  const testFile = path.join( testFolder, 'dummy-data.txt');
+  let textData = '' ;
+
+  // read contents of dummy text file.
+  {
+    const { buf, errmsg } = await ibmi_ifs_getFileContents( testFile, connectSettings, {getMethod:'IFS'});
+    textData = buf.toString( ) ;
+  }
+
+  // ibmi_ifs_uploadTextToFile
+  {
+    const method = 'ibmi_ifs_uploadTextToFile';
+    textData += 'htdocs of zend server \n';
+    const { mtime, size, errmsg } = await ibmi_ifs_uploadTextToFile( 
+                    textData, testFile, connectSettings);
+    const actual = size;
+    const expected = textData.length;
+
+    testResults_append(results, { method, actual, expected });
   }
 
   return { results }

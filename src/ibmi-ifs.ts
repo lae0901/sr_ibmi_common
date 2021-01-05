@@ -79,18 +79,30 @@ export async function ibmi_ifs_getItems(
   return { rows, errmsg };
 }
 
+// ---------------------------- iGetFileContents_options ----------------------------
+interface iGetFileContents_options 
+{
+  returnType?: string;
+  getMethod?: 'IFS' | 'PHP' | '' ;
+}
+
 // ----------------------- ibmi_ifs_getFileContents ----------------------------
 // returnType: buf, text
+// options: { returnType, getMethod?: 'IFS' | 'PHP' | '' }
 export async function ibmi_ifs_getFileContents( filePath:string, 
-            connectSettings: iConnectSettings, returnType = 'buf')
+            connectSettings: iConnectSettings, 
+            options?: iGetFileContents_options )
 {
   let ifsFilePath = filePath ;
+  options = options || {} ;
+  const getMethod = options.getMethod || '' ;
   const libl = connectionSettings_toProductConnectLibl(connectSettings);
   const serverUrl = connectSettings.serverUrl;
-  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/ifs-file-get-contents-base64.php`;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}` + 
+              `/php/ifs-file-get-contents-base64.php`;
   const params =
   {
-    libl, fromIfsPath:ifsFilePath,
+    libl, fromIfsPath:ifsFilePath, getMethod,
     debug: 'N', joblog: 'N'
   };
 
@@ -147,6 +159,37 @@ export async function ibmi_ifs_uploadFile(filePath: string, ifsFilePath:string,
   afterUpload_mtime = mtime ;
 
   return { mtime:afterUpload_mtime, size } ;
+}
+
+// ----------------------- ibmi_ifs_uploadTextToFile ----------------------------
+// returnType: buf, text
+export async function ibmi_ifs_uploadTextToFile( text: string, ifsFilePath:string,
+                            connectSettings: iConnectSettings)
+{
+  let afterUpload_mtime = 0;
+  const libl = connectionSettings_toProductConnectLibl(connectSettings);
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}/php/upload-to-ifs.php`;
+
+  // convert data Buffer to base64
+  const builder = base64Builder_new();
+  base64Builder_append(builder, text);
+  const base64_text = base64Builder_final(builder);
+
+  const form = new FormData();
+  form.append('field', base64_text, path.basename(ifsFilePath));
+  form.append('folder', path.dirname(ifsFilePath));
+
+  const headers = form.getHeaders();
+  headers['Content-length'] = await form_getLength(form);
+
+  const result = await axios.post(
+    url, form,
+    { headers, });
+  const { mtime, size, errmsg } = result.data as { errmsg:string, mtime: number, size: number };
+  afterUpload_mtime = mtime;
+
+  return { errmsg, mtime: afterUpload_mtime, size };
 }
 
 // -------------------------------- ibmi_ifs_unlink --------------------------------
