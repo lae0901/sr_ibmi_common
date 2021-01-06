@@ -148,7 +148,7 @@ async function as400_member_test(): Promise<{ results: iTestResultItem[] }>
 
 // ---------------------------------- as400_srcmbr_test ----------------------------------
 // add and remove member from file.
-async function as400_srcmbr_test(): Promise<{ results: iTestResultItem[] }>
+async function as400_srcmbr_test()
 {
   const results = testResults_new();
   const connectSettings = test_connectSettings_new();
@@ -575,11 +575,48 @@ async function test_ifs_unlink()
 
   // delete the temporary dir and its contents.
   {
-    await dir_rmdir(tempTestDir, { recursive: true });
+    // await dir_rmdir(tempTestDir, { recursive: true });
+    await xir_rmdir(tempTestDir, { recursive: true });
   }
 
   return results;
 }
+
+
+// bgnTemp
+// ----------------------------------- xir_rmdir ------------------------------
+// remove directory. use recursive option to also remove contents.
+export function xir_rmdir(dirPath: string, options?: { recursive?: boolean }): Promise<{ errmsg: string }>
+{
+  options = options || {};
+  const recursive = options.recursive || false;
+  const promise = new Promise<{ errmsg: string }>(async (resolve, reject) =>
+  {
+    let errmsg = '';
+
+    try
+    {
+      const opt : fs.RmDirOptions = { recursive } ;
+      fs.rmdir(dirPath, opt, (err) =>
+      {
+        if (err)
+        {
+          errmsg = err.message;
+        }
+        resolve({ errmsg });
+      });
+    }
+    catch( err )
+    {
+      errmsg = err.message ;
+      resolve({ errmsg });
+    }
+  });
+  return promise;
+}
+// endTemp
+
+
 
 // ------------------------------ test_ifs_upload --------------------
 // upload file from PC to IFS.

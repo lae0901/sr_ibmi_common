@@ -614,9 +614,10 @@ export async function as400_uploadLinesToSrcmbr(connectSettings: iConnectSetting
   uploadStream_lines.push(...formattedLines);
   const sourceLines_text = uploadStream_lines.join('\n') + '\n';
 
-  const encoder = new TextEncoder();
-  const uint8array = encoder.encode(sourceLines_text);
-  const data = Buffer.from(uint8array);
+  // const encoder = new TextEncoder();
+  // const uint8array = encoder.encode(sourceLines_text);
+  // const data = Buffer.from(uint8array);
+  const data = Buffer.from( sourceLines_text );
 
   const form = new FormData();
   // Second argument  can take Buffer or Stream (lazily read during the request) too.
