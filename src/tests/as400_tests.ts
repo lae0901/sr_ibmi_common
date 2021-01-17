@@ -366,8 +366,6 @@ async function test_ifs_getItems()
   // ibmi_ifs_getItems
   {
     method = 'ibmi_ifs_getItems'; 
-    let passText = '';
-    let errmsg = '';
     const dirPath = '/home/srichter';
     const { rows, errmsg:errText} = await ibmi_ifs_getItems(
       dirPath, connectSettings, {});
@@ -433,7 +431,7 @@ async function test_ifs_getFileContents()
   {
     method = 'ibmi_ifs_getFileContents';
     let errmsg = '';
-    const expected = {bufLgth:252};
+    const expected = {bufLgth:6818};
     const filePath = '/home/srichter/abc.pdf';
     const {buf, errmsg:errText } = await ibmi_ifs_getFileContents( filePath, connectSettings );
     const actual = {bufLgth: buf ? buf.length : undefined } ;

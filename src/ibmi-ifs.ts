@@ -127,6 +127,32 @@ export async function ibmi_ifs_getFileContents( filePath:string,
   return {buf,errmsg};
 }
 
+// ----------------------- ibmi_ifs_getFileContents_gccDirect ----------------------------
+export async function ibmi_ifs_getFileContents_gccDirect(filePath: string,
+  connectSettings: iConnectSettings )
+{
+  let errmsg = '' ;
+  let ifsFilePath = filePath;
+  const serverUrl = connectSettings.serverUrl;
+  const url = `${serverUrl}/${connectSettings.autocoder_ifs_product_folder}` +
+    `/gcc/ifs-file-get-contents`;
+  const params =
+  {
+    fromIfsPath: ifsFilePath, debug: 'N', joblog: 'N'
+  };
+
+  const query = object_toQueryString(params);
+  const url_query = url + '?' + query;
+
+  const response = await axios({
+    method: 'get', url: url_query, responseType: 'blob'
+  });
+
+  const text = response.data ;
+
+  return { text , errmsg };
+}
+
 // ----------------------- ibmi_ifs_uploadFile ----------------------------
 // returnType: buf, text
 export async function ibmi_ifs_uploadFile(filePath: string, ifsFilePath:string,
