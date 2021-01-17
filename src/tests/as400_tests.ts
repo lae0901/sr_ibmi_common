@@ -315,9 +315,9 @@ async function ifs_ibmi_test()
     results.push(...res);
   }
 
-  // ifs_ibmi_getFileContents
+  // test_ifs_getFileContents
   {
-    const { results: res } = await ifs_ibmi_getFileContents();
+    const { results: res } = await test_ifs_getFileContents();
     results.push(...res);
   }
 
@@ -421,9 +421,9 @@ async function ifs_ibmi_getItems_err(): Promise<{ results: iTestResultItem[] }>
   return { results }
 }
 
-// ------------------------------ ifs_ibmi_getFileContents --------------------
+// ------------------------------ test_ifs_getFileContents --------------------
 // add and remove member from file.
-async function ifs_ibmi_getFileContents()  
+async function test_ifs_getFileContents()  
 {
   const results = testResults_new();
   let method = '';
@@ -432,28 +432,16 @@ async function ifs_ibmi_getFileContents()
   // ibmi_ifs_getFileContents
   {
     method = 'ibmi_ifs_getFileContents';
-    let passText = '';
     let errmsg = '';
+    const expected = {bufLgth:252};
     const filePath = '/home/srichter/abc.pdf';
-    const itemName = '';
-    const itemType = '';
     const {buf, errmsg:errText } = await ibmi_ifs_getFileContents( filePath, connectSettings );
+    const actual = {bufLgth: buf ? buf.length : undefined } ;
+    const desc = `read contents of ${filePath}`;
     if ( errText )
       errmsg = `file ${filePath} read error ${errText}`;
-    else if (buf.length > 0)
-    {
-      passText = `read file contents from ifs file ${filePath}.`;
 
-      const toPath = system_downloadsFolder() ;
-      const fileName = path.parse(filePath).base;
-      const toFilePath = path.join(toPath, fileName) ;
-    }
-    else
-    {
-      errmsg = `error reading file contents from folder ${filePath}`;
-    }
-
-    testResults_append(results, passText, errmsg, method);
+    testResults_append(results, { method, errmsg, actual, expected, desc } );
   }
 
   return { results }

@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/lae0901/sr_ibmi_common#readme",
   "devDependencies": {
-    "@types/node": "^13.13.39",
+    "@types/node": "^13.13.40",
     "sr_test_framework": "^1.0.18",
     "typescript": "^3.9.7"
   },
